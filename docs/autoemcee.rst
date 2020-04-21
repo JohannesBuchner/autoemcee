@@ -1,5 +1,5 @@
 autoemcee module
-===============
+================
 
 .. automodule:: autoemcee
    :members:

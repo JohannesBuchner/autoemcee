@@ -7,6 +7,7 @@ import os
 import sys
 import logging
 import warnings
+import corner
 
 import numpy as np
 
@@ -96,8 +97,22 @@ class ReactiveAffineInvariantSampler(object):
 
         self.sampler = 'reactive-importance'
         self.x_dim = x_dim
-        self.log = True
 
+        self.ncall = 0
+        self.use_mpi = False
+        try:
+            from mpi4py import MPI
+            self.comm = MPI.COMM_WORLD
+            self.mpi_size = self.comm.Get_size()
+            self.mpi_rank = self.comm.Get_rank()
+            if self.mpi_size > 1:
+                self.use_mpi = True
+                self._setup_distributed_seeds()
+        except Exception:
+            self.mpi_size = 1
+            self.mpi_rank = 0
+        
+        self.log = self.mpi_rank == 0
         if self.log:
             self.logger = create_logger('autoemcee')
 
@@ -130,12 +145,25 @@ class ReactiveAffineInvariantSampler(object):
         assert np.isfinite(logl).all(), ("Error in loglikelihood function: returned non-finite number: %s for input u=%s p=%s" % (logl, u, p))
 
         self.loglike = loglike
-        self.ncall = 0
 
         if transform is None:
             self.transform = lambda x: x
         else:
             self.transform = transform
+
+    def _setup_distributed_seeds(self):
+        if not self.use_mpi:
+            return
+        seed = 0
+        if self.mpi_rank == 0:
+            seed = np.random.randint(0, 1000000)
+
+        seed = self.comm.bcast(seed, root=0)
+        if self.mpi_rank > 0:
+            # from http://arxiv.org/abs/1005.4117
+            seed = int(abs(((seed * 181) * ((self.mpi_rank - 83) * 359)) % 104729))
+            # print('setting seed:', self.mpi_rank, seed)
+            np.random.seed(seed)
 
     def _emcee_logprob(self, u):
         mask = np.logical_and((u > 0).all(axis=1), (u < 1).all(axis=1))
@@ -164,7 +192,7 @@ class ReactiveAffineInvariantSampler(object):
 
 
     def run(self,
-            num_global_samples=100,
+            num_global_samples=10000,
             num_chains=4,
             num_walkers=None,
             max_ncalls=1000000,
@@ -206,21 +234,31 @@ class ReactiveAffineInvariantSampler(object):
         """
         
         if num_walkers is None:
-            num_walkers = min(100, 2 * self.x_dim)
+            num_walkers = max(100, 2 * self.x_dim)
 
         num_steps = num_initial_steps
-        self.logger.info("finding starting points and running initial %d MCMC steps" % (num_steps))
+        if self.use_mpi:
+            num_chains = self.mpi_size
+            num_chains_here = 1
+        else:
+            num_chains_here = num_chains
+
+        if self.log:
+            self.logger.info("finding starting points and running initial %d MCMC steps" % (num_steps))
+        
         self.samplers = []
-        for chain in range(num_chains):
+        for chain in range(num_chains_here):
             u, p, L = self.find_starting_walkers(num_global_samples, num_walkers)
             
             sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
             self.samplers.append(sampler)
-            sampler.run_mcmc(u, num_steps)
+            sampler.run_mcmc(u, num_steps, progress=self.log)
+        
         self.ncall += num_chains * (num_global_samples + (num_steps + 1) * num_walkers)
         
         for it in range(max_improvement_loops):
-            self.logger.debug("checking convergence (iteration %d) ..." % (it+1))
+            if self.log:
+                self.logger.debug("checking convergence (iteration %d) ..." % (it+1))
             converged = True
             # check state of chains:
             for sampler in self.samplers:
@@ -228,17 +266,18 @@ class ReactiveAffineInvariantSampler(object):
                 assert chain.shape == (num_steps, num_walkers, self.x_dim)
                 accepts = (chain[1:, :, :] != chain[:-1, :, :]).any(axis=2).sum(axis=0)
                 assert accepts.shape == (num_walkers,)
-                print("accepts:", accepts * 100. / num_steps)
+                if self.log:
+                    self.logger.debug("acceptance rates: %s", accepts * 100. / num_steps)
                 
                 # flatchain = sampler.get_chain(flat=True)
                 
                 # diagnose this chain
                 
                 # 0. analyse each variable
-                max_autocorrlength = 1
+                # max_autocorrlength = 1
                 for i in range(self.x_dim):
-                    chain_variable = chain[:, :, i]
                     """
+                    chain_variable = chain[:, :, i]
                     # 1. treat each walker as a independent chain
                     try:
                         for w in range(num_walkers):
@@ -273,25 +312,50 @@ class ReactiveAffineInvariantSampler(object):
                 #self.logger.debug("autocorrelation length: tau=%.1f -> %dx lengths" % (max_autocorrlength, num_steps / max_autocorrlength))
                 if not converged:
                     break
-                
+            
+            # merge converged across MPI chains
+            if self.use_mpi:
+                recv_converged = self.comm.gather(converged, root=0)
+                converged = all(self.comm.bcast(recv_converged, root=0))
+            
+            
             if converged:
                 # finally, gelman-rubin diagnostic on chains
-                chains = arviz.convert_to_dataset(np.asarray([sampler.get_chain(flat=True) for sampler in self.samplers]))
-                rhat = arviz.rhat(chains).x.data
-                self.logger.debug("rhat: %s (<1.2 is good)", rhat)
+                chains = np.asarray([sampler.get_chain(flat=True) for sampler in self.samplers])
+                if self.use_mpi:
+                    recv_chains = self.comm.gather(chains, root=0)
+                    chains = np.concatenate(self.comm.bcast(recv_chains, root=0))
+
+                assert chains.shape == (num_chains, num_steps * num_walkers, self.x_dim), (chains.shape, (num_chains, num_steps * num_walkers, self.x_dim))
+
+                rhat = arviz.rhat(arviz.convert_to_dataset(chains)).x.data
+                if self.log:
+                    self.logger.debug("rhat chain diagnostic: %s (<1.2 is good)", rhat)
                 converged = np.all(rhat < 1.2)
+
+                if self.use_mpi:
+                    converged = self.comm.bcast(converged, root=0)
             
             if converged:
-                self.logger.info("converged!!!")
+                if self.log:
+                    self.logger.info("converged!!!")
                 break
             
-            self.logger.info("not converged yet at iteration %d" % (it+1))
+            if self.ncall > max_ncalls:
+                if self.log:
+                    self.logger.warn("maximum number of likelihood calls reached")
+                break
+                
+            
+            if self.log:
+                self.logger.info("not converged yet at iteration %d" % (it+1))
             #self.logger.error("error at iteration %d" % (it+1))
             last_num_steps = num_steps
-            num_steps = int(last_num_steps * 4)
+            num_steps = int(last_num_steps * 10)
             
             self.ncall += num_chains * (num_steps + 1 + last_num_steps) * num_walkers
-            self.logger.info("Running %d MCMC steps ..." % (num_steps))
+            if self.log:
+                self.logger.info("Running %d MCMC steps ..." % (num_steps))
             for sampler in self.samplers:
                 chain = sampler.get_chain(flat=True)
                 # get a scale small compared to the width of the current posterior
@@ -311,40 +375,21 @@ class ReactiveAffineInvariantSampler(object):
                 u = np.clip(u, 1e-10, 1 - 1e-10)
                 assert u.shape == (num_walkers, self.x_dim), (u.shape, (num_walkers, self.x_dim))
                 
-                self.logger.info("Starting at %s +- %s", u.mean(axis=0), u.std(axis=0))
+                if self.log:
+                    self.logger.info("Starting at %s +- %s", u.mean(axis=0), u.std(axis=0))
                 sampler.reset()
                 #self.logger.info("not converged yet at iteration %d" % (it+1))
-                state = sampler.run_mcmc(u, last_num_steps)
+                state = sampler.run_mcmc(u, last_num_steps, progress=self.log)
                 sampler.reset()
-                sampler.run_mcmc(state, num_steps)
-            
+                sampler.run_mcmc(state, num_steps, progress=self.log)
 
-"""
-
-    def _update_results(self, samples, weights):
-        if self.log:
-            self.logger.info('Likelihood function evaluations: %d', self.ncall)
-
-        integral_estimator = weights.sum() / len(weights)
-        integral_uncertainty_estimator = np.sqrt((weights**2).sum() / len(weights) - integral_estimator**2) / np.sqrt(len(weights) - 1)
-
-        logZ = np.log(integral_estimator)
-        logZerr = np.log(integral_estimator + integral_uncertainty_estimator) - logZ
-        ess_fraction = ess(weights)
-
-        # get a decent accuracy based on the weights, and not too few samples
-        Nsamples = int(max(400, ess_fraction * len(weights) * 40))
-        eqsamples_u = resample_equal(samples, weights / weights.sum(), N=Nsamples)
-        eqsamples = np.asarray([self.transform(u) for u in eqsamples_u])
-
-        results = dict(
-            z=integral_estimator,
-            zerr=integral_uncertainty_estimator,
-            logz=logZ,
-            logzerr=logZerr,
-            ess=ess_fraction,
+        eqsamples = np.asarray([sampler.get_chain(flat=True) for sampler in self.samplers])
+        if self.use_mpi:
+            recv_eqsamples = self.comm.gather(eqsamples, root=0)
+            eqsamples = np.concatenate(self.comm.bcast(recv_eqsamples, root=0))
+        
+        self.results = dict(
             paramnames=self.paramnames,
-            ncall=int(self.ncall),
             posterior=dict(
                 mean=eqsamples.mean(axis=0).tolist(),
                 stdev=eqsamples.std(axis=0).tolist(),
@@ -354,13 +399,11 @@ class ReactiveAffineInvariantSampler(object):
             ),
             samples=eqsamples,
         )
-        self.results = results
-
+        return self.results
+        
     def print_results(self):
         "" "Give summary of marginal likelihood and parameters."" "
         if self.log:
-            print()
-            print('logZ = %(logz).3f +- %(logzerr).3f' % self.results)
             print()
             for i, p in enumerate(self.paramnames):
                 v = self.results['samples'][:, i]
@@ -373,4 +416,10 @@ class ReactiveAffineInvariantSampler(object):
                 fmt = '%%.%df' % i
                 fmts = '\t'.join(['    %-20s' + fmt + " +- " + fmt])
                 print(fmts % (p, med, sigma))
-"""
+
+    def plot(self, **kwargs):
+        if self.log:
+            corner.corner(
+                self.results['samples'],
+                labels=self.results['paramnames'],
+                show_titles=True)

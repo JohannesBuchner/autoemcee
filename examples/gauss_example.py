@@ -26,7 +26,8 @@ def main(args):
         num_walkers=10,
         max_improvement_loops=40,
     )
-    """
+    if sampler.mpi_rank != 0:
+        return
     sampler.print_results()
     
     from getdist import MCSamples, plots
@@ -40,10 +41,9 @@ def main(args):
     g = plots.get_subplot_plotter(width_inch=8)
     g.settings.num_plot_contours = 3
     g.triangle_plot(mcsamples, filled=False, contour_colors=plt.cm.Set1.colors)
-    plt.savefig('testsine_posterior.pdf', bbox_inches='tight')
+    plt.savefig('testgauss_posterior.pdf', bbox_inches='tight')
     plt.close()
-    """
-    
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

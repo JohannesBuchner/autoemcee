@@ -105,6 +105,5 @@ ENV/
 *.pyc
 #*.txt
 *.pdf
-*.png
 *.log
 *.npz

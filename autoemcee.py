@@ -21,7 +21,7 @@ __version__ = '0.1.0'
 
 
 # Some parts are from the nnest library by Adam Moss (https://github.com/adammoss/nnest)
-def create_logger(module_name, log_dir=None, level=logging.DEBUG):
+def create_logger(module_name, log_dir=None, level=logging.INFO):
     """
     Set up the logging channel `module_name`.
 
@@ -32,7 +32,7 @@ def create_logger(module_name, log_dir=None, level=logging.DEBUG):
     registered.
     """
     logger = logging.getLogger(str(module_name))
-    logger.setLevel(level)
+    logger.setLevel(logging.DEBUG)
     first_logger = logger.handlers == []
     if log_dir is not None and first_logger:
         # create file handler which logs even debug messages
@@ -267,7 +267,8 @@ class ReactiveAffineInvariantSampler(object):
                 accepts = (chain[1:, :, :] != chain[:-1, :, :]).any(axis=2).sum(axis=0)
                 assert accepts.shape == (num_walkers,)
                 if self.log:
-                    self.logger.debug("acceptance rates: %s", accepts * 100. / num_steps)
+                    i = np.argsort(accepts)
+                    self.logger.debug("acceptance rates: %s (worst few)", accepts[i[:8]] * 100. / num_steps)
                 
                 # flatchain = sampler.get_chain(flat=True)
                 
@@ -383,7 +384,11 @@ class ReactiveAffineInvariantSampler(object):
                 sampler.reset()
                 sampler.run_mcmc(state, num_steps, progress=self.log)
 
-        eqsamples = np.concatenate([sampler.get_chain(flat=True) for sampler in self.samplers])
+        if self.transform is None:
+            eqsamples = np.concatenate([sampler.get_chain(flat=True) for sampler in self.samplers])
+        else:
+            eqsamples = np.concatenate([self.transform(sampler.get_chain(flat=True)) for sampler in self.samplers])
+
         if self.use_mpi:
             recv_eqsamples = self.comm.gather(eqsamples, root=0)
             eqsamples = np.concatenate(self.comm.bcast(recv_eqsamples, root=0))

@@ -3,7 +3,6 @@ language: python
 sudo: false
 
 python:
-  - "2.7"
   - "3.5"
   - "3.8"
 
@@ -11,11 +10,7 @@ install:
   # Fetch and install conda
   # -----------------------
   - export CONDA_BASE="http://repo.continuum.io/miniconda/Miniconda"
-  - if [[ "${TRAVIS_PYTHON_VERSION}" == 2* ]]; then
-      wget ${CONDA_BASE}2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget ${CONDA_BASE}3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget ${CONDA_BASE}3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p ${HOME}/miniconda
   - export PATH="${HOME}/miniconda/bin:${PATH}"
 
@@ -33,7 +28,6 @@ install:
   # Customise the testing environment
   # ---------------------------------
   - conda install --quiet --file conda-requirements.txt
-  - pip install coveralls
 
   # Summerise environment
   # ---------------------

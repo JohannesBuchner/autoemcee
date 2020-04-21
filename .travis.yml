@@ -24,7 +24,7 @@ install:
   - ENV_NAME="test-environment"
   - conda create --quiet -n ${ENV_NAME} python=${TRAVIS_PYTHON_VERSION} --file conda-requirements.txt
   - source activate ${ENV_NAME}
-  - git clone https://github.com/JohannesBuchner/zeus/
+  - git clone https://github.com/JohannesBuchner/zeus/ && pushd zeus && python setup.py install && popd; rm -rf zeus
 
   # Customise the testing environment
   # ---------------------------------

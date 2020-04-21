@@ -34,8 +34,8 @@ def main(args):
 
     samples_g = MCSamples(samples=sampler.results['samples'],
                            names=sampler.results['paramnames'],
-                           label='Gaussian',
-                           settings=dict(smooth_scale_2D=1))
+                           label='Gaussian')
+                           #settings=dict(smooth_scale_2D=1))
 
     mcsamples = [samples_g]
     g = plots.get_subplot_plotter(width_inch=8)

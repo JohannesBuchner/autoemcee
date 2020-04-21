@@ -11,7 +11,6 @@ import corner
 
 import numpy as np
 
-import emcee
 import arviz
 
 __all__ = ['ReactiveAffineInvariantSampler']
@@ -32,7 +31,6 @@ def create_logger(module_name, log_dir=None, level=logging.INFO):
     registered.
     """
     logger = logging.getLogger(str(module_name))
-    logger.setLevel(logging.DEBUG)
     first_logger = logger.handlers == []
     if log_dir is not None and first_logger:
         # create file handler which logs even debug messages
@@ -49,6 +47,7 @@ def create_logger(module_name, log_dir=None, level=logging.INFO):
         handler.setLevel(level)
         formatter = logging.Formatter('[{}] %(message)s'.format(module_name))
         handler.setFormatter(formatter)
+        logger.setLevel(level)
         logger.addHandler(handler)
 
     return logger
@@ -73,6 +72,7 @@ class ReactiveAffineInvariantSampler(object):
                  transform=None,
                  num_test_samples=2,
                  vectorized=False,
+                 sampler='goodman-weare',
                  ):
         """Initialise Affine-Invariant sampler.
 
@@ -87,6 +87,11 @@ class ReactiveAffineInvariantSampler(object):
         transform: function
             parameter transform from unit cube to physical parameters.
             Receives multiple cube vectors, returns multiple parameter vectors.
+        sampler: str
+            if 'goodman-weare': use Goodman & Weare's affine invariant MCMC ensemble sampler
+            if 'slice': use Karamanis & Beutler (2020)'s ensemble slice sampler
+        vectorized: bool
+            if true, likelihood and transform receive arrays of points, and return arrays
 
         num_test_samples: int
             test transform and likelihood with this number of
@@ -100,6 +105,7 @@ class ReactiveAffineInvariantSampler(object):
 
         self.ncall = 0
         self.use_mpi = False
+        self.sampler = sampler
         try:
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
@@ -250,7 +256,12 @@ class ReactiveAffineInvariantSampler(object):
         for chain in range(num_chains_here):
             u, p, L = self.find_starting_walkers(num_global_samples, num_walkers)
             
-            sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
+            if self.sampler == 'goodman-weare':
+                import emcee
+                sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
+            if self.sampler == 'slice':
+                import zeus
+                sampler = zeus.sampler(nwalkers=num_walkers, ndim=self.x_dim, logprob=self._emcee_logprob, vectorize=True)
             self.samplers.append(sampler)
             sampler.run_mcmc(u, num_steps, progress=self.log)
         
@@ -263,7 +274,7 @@ class ReactiveAffineInvariantSampler(object):
             # check state of chains:
             for sampler in self.samplers:
                 chain = sampler.get_chain()
-                assert chain.shape == (num_steps, num_walkers, self.x_dim)
+                assert chain.shape == (num_steps, num_walkers, self.x_dim), (chain.shape, (num_steps, num_walkers, self.x_dim))
                 accepts = (chain[1:, :, :] != chain[:-1, :, :]).any(axis=2).sum(axis=0)
                 assert accepts.shape == (num_walkers,)
                 if self.log:
@@ -380,9 +391,10 @@ class ReactiveAffineInvariantSampler(object):
                     self.logger.info("Starting at %s +- %s", u.mean(axis=0), u.std(axis=0))
                 sampler.reset()
                 #self.logger.info("not converged yet at iteration %d" % (it+1))
-                state = sampler.run_mcmc(u, last_num_steps, progress=self.log)
+                sampler.run_mcmc(u, last_num_steps, progress=self.log)
+                last_samples = sampler.chain[-1, :, :]
                 sampler.reset()
-                sampler.run_mcmc(state, num_steps, progress=self.log)
+                sampler.run_mcmc(last_samples, num_steps, progress=self.log)
 
         if self.transform is None:
             eqsamples = np.concatenate([sampler.get_chain(flat=True) for sampler in self.samplers])

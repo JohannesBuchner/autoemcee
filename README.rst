@@ -7,7 +7,7 @@ Runs MCMC automatically to convergence.
 About
 -----
 
-Runs a family of Affine-Invariant Markov Chain Monte Carlo samplers (emcee)
+Runs a family of Markov Chain Monte Carlo ensemble samplers (Affine-Invariant or Slice Sampler)
 with gradually increasing number of samples until they converge.
 
 Convergence is tested for each ensemble and for each parameter with the Geweke diagnostic.
@@ -26,7 +26,7 @@ Can be run with MPI without modifying the code.
         :alt: Documentation Status
 
 
-This package is built on top of emcee, anviz and mpi4py.
+This package is built on top of emcee, zeus, anviz and mpi4py.
 
 You can help by testing autoemcee and reporting issues. Code contributions are welcome.
 See the `Contributing page <https://johannesbuchner.github.io/autoemcee/contributing.html>`_.
@@ -36,7 +36,7 @@ Features
 
 * Pythonic. pip installable.
 * Easy to program for: Sanity checks with meaningful errors
-* Fast
+* Supports both emcee and zeus
 * MPI support
 
 Usage
@@ -45,6 +45,11 @@ Usage
 Read the full documentation at:
 
 https://johannesbuchner.github.io/autoemcee/
+
+
+For parallelisation, use::
+
+        mpiexec -np 4 python3 yourscript.py
 
 
 Licence

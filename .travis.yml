@@ -27,7 +27,7 @@ install:
 
   # Customise the testing environment
   # ---------------------------------
-  - conda install --quiet --file conda-requirements.txt
+  - conda install --quiet --file conda-requirements.txt coveralls
 
   # Summerise environment
   # ---------------------

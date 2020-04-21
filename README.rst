@@ -18,8 +18,8 @@ Can be run with MPI without modifying the code.
 .. image:: https://img.shields.io/pypi/v/autoemcee.svg
         :target: https://pypi.python.org/pypi/autoemcee
 
-.. image:: https://circleci.com/gh/JohannesBuchner/autoemcee/tree/master.svg?style=svg
-        :target: https://circleci.com/gh/JohannesBuchner/autoemcee
+.. image:: https://api.travis-ci.org/JohannesBuchner/autoemcee.svg?branch=master&status=started
+        :target: https://travis-ci.org/github/JohannesBuchner/autoemcee
 
 .. image:: https://img.shields.io/badge/docs-published-ok.svg
         :target: https://johannesbuchner.github.io/autoemcee/

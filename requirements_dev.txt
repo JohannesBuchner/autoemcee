@@ -1,6 +1,6 @@
 numpy
-scipy
 emcee
+arviz
 flake8
 coveralls
 pytest-html

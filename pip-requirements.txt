@@ -1,6 +1,3 @@
 numpy
-scipy
 emcee
-flake8
-coveralls
-pytest-html
+arviz

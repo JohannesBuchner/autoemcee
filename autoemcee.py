@@ -398,6 +398,7 @@ class ReactiveAffineInvariantSampler(object):
                 errup=np.percentile(eqsamples, 84.1345, axis=0).tolist(),
             ),
             samples=eqsamples,
+            ncall = self.ncall,
         )
         return self.results
         

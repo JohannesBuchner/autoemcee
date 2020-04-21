@@ -18,7 +18,7 @@ def test_run():
         return 10. * x - 5.
     
 
-    sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform)
+    sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, sampler='goodman-weare')
     r = sampler.run(max_improvement_loops=1)
     #sampler.laplace_approximate()
     
@@ -39,7 +39,7 @@ def test_rosen():
         assert len(u) == len(paramnames)
         return u * 20 - 10
     
-    sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform)
+    sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, sampler='slice')
     sampler.run(max_improvement_loops=1)
     
 

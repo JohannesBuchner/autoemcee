@@ -130,6 +130,7 @@ class ReactiveAffineInvariantSampler(object):
         assert np.isfinite(logl).all(), ("Error in loglikelihood function: returned non-finite number: %s for input u=%s p=%s" % (logl, u, p))
 
         self.loglike = loglike
+        self.ncall = 0
 
         if transform is None:
             self.transform = lambda x: x
@@ -163,7 +164,7 @@ class ReactiveAffineInvariantSampler(object):
 
 
     def run(self,
-            num_global_samples=10000,
+            num_global_samples=100,
             num_chains=4,
             num_walkers=None,
             max_ncalls=1000000,
@@ -216,6 +217,7 @@ class ReactiveAffineInvariantSampler(object):
             sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
             self.samplers.append(sampler)
             sampler.run_mcmc(u, num_steps)
+        self.ncall += num_chains * (num_global_samples + (num_steps + 1) * num_walkers)
         
         for it in range(max_improvement_loops):
             self.logger.debug("checking convergence (iteration %d) ..." % (it+1))
@@ -288,6 +290,7 @@ class ReactiveAffineInvariantSampler(object):
             last_num_steps = num_steps
             num_steps = int(last_num_steps * 4)
             
+            self.ncall += num_chains * (num_steps + 1 + last_num_steps) * num_walkers
             self.logger.info("Running %d MCMC steps ..." % (num_steps))
             for sampler in self.samplers:
                 chain = sampler.get_chain(flat=True)
@@ -311,9 +314,9 @@ class ReactiveAffineInvariantSampler(object):
                 self.logger.info("Starting at %s +- %s", u.mean(axis=0), u.std(axis=0))
                 sampler.reset()
                 #self.logger.info("not converged yet at iteration %d" % (it+1))
-                sampler.run_mcmc(u, last_num_steps)
+                state = sampler.run_mcmc(u, last_num_steps)
                 sampler.reset()
-                sampler.run_mcmc(u, num_steps)
+                sampler.run_mcmc(state, num_steps)
             
 
 """

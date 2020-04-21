@@ -383,7 +383,7 @@ class ReactiveAffineInvariantSampler(object):
                 sampler.reset()
                 sampler.run_mcmc(state, num_steps, progress=self.log)
 
-        eqsamples = np.asarray([sampler.get_chain(flat=True) for sampler in self.samplers])
+        eqsamples = np.concatenate([sampler.get_chain(flat=True) for sampler in self.samplers])
         if self.use_mpi:
             recv_eqsamples = self.comm.gather(eqsamples, root=0)
             eqsamples = np.concatenate(self.comm.bcast(recv_eqsamples, root=0))

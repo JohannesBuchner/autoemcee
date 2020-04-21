@@ -1,0 +1,636 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>autoemcee &mdash; autoemcee 0.1.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/icon.ico"/>
+  
+  
+  
+    <link rel="canonical" href="https://johannesbuchner.github.io/autoemcee/_modules/autoemcee.html"/>
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> autoemcee
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">autoemcee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issues.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">autoemcee</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content style-external-links">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>autoemcee</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for autoemcee</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Calculates the Bayesian evidence and posterior samples of arbitrary monomodal models.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">corner</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">emcee</span>
+<span class="kn">import</span> <span class="nn">arviz</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ReactiveAffineInvariantSampler&#39;</span><span class="p">]</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Johannes Buchner&quot;&quot;&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;johannes.buchner.acad@gmx.com&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
+
+
+<span class="c1"># Some parts are from the nnest library by Adam Moss (https://github.com/adammoss/nnest)</span>
+<span class="k">def</span> <span class="nf">create_logger</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">log_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set up the logging channel `module_name`.</span>
+
+<span class="sd">    Append to ``debug.log`` in `log_dir` (if not ``None``).</span>
+<span class="sd">    Write to stdout with output level `level`.</span>
+
+<span class="sd">    If logging handlers are already registered, no new handlers are</span>
+<span class="sd">    registered.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">module_name</span><span class="p">))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">first_logger</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span> <span class="o">==</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">first_logger</span><span class="p">:</span>
+        <span class="c1"># create file handler which logs even debug messages</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_dir</span><span class="p">,</span> <span class="s1">&#39;debug.log&#39;</span><span class="p">))</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+            <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> [</span><span class="si">{}</span><span class="s1">] [</span><span class="si">%(levelname)s</span><span class="s1">] </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">),</span>
+            <span class="n">datefmt</span><span class="o">=</span><span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">first_logger</span><span class="p">:</span>
+        <span class="c1"># if it is new, register to write to stdout</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">] </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">))</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logger</span>
+
+
+<span class="k">def</span> <span class="nf">vectorize</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Vectorize likelihood or prior_transform function.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">vectorized</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; vectorized version of function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">function</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+
+    <span class="n">vectorized</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="n">function</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">return</span> <span class="n">vectorized</span>
+
+
+<div class="viewcode-block" id="ReactiveAffineInvariantSampler"><a class="viewcode-back" href="../autoemcee.html#autoemcee.ReactiveAffineInvariantSampler">[docs]</a><span class="k">class</span> <span class="nc">ReactiveAffineInvariantSampler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Emcee sampler with reactive exploration strategy.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">param_names</span><span class="p">,</span>
+                 <span class="n">loglike</span><span class="p">,</span>
+                 <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">num_test_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialise Affine-Invariant sampler.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        param_names: list of str, names of the parameters.</span>
+<span class="sd">            Length gives dimensionality of the sampling problem.</span>
+
+<span class="sd">        loglike: function</span>
+<span class="sd">            log-likelihood function.</span>
+<span class="sd">            Receives multiple parameter vectors, returns vector of likelihood.</span>
+<span class="sd">        transform: function</span>
+<span class="sd">            parameter transform from unit cube to physical parameters.</span>
+<span class="sd">            Receives multiple cube vectors, returns multiple parameter vectors.</span>
+
+<span class="sd">        num_test_samples: int</span>
+<span class="sd">            test transform and likelihood with this number of</span>
+<span class="sd">            random points for errors first. Useful to catch bugs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span> <span class="o">=</span> <span class="n">param_names</span>
+        <span class="n">x_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="s1">&#39;reactive-importance&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">=</span> <span class="n">x_dim</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpi_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">Get_size</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setup_distributed_seeds</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpi_size</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">create_logger</span><span class="p">(</span><span class="s1">&#39;autoemcee&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">vectorized</span><span class="p">:</span>
+            <span class="n">loglike</span> <span class="o">=</span> <span class="n">vectorize</span><span class="p">(</span><span class="n">loglike</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">transform</span> <span class="o">=</span> <span class="n">vectorize</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_likelihood_function</span><span class="p">(</span><span class="n">transform</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">num_test_samples</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_likelihood_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">num_test_samples</span><span class="p">,</span> <span class="n">make_safe</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Store the transform and log-likelihood functions.</span>
+
+<span class="sd">        Tests with `num_test_samples` whether they work and give the correct output.</span>
+
+<span class="sd">        if make_safe is set, make functions safer by accepting misformed</span>
+<span class="sd">        return shapes and non-finite likelihood values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># do some checks on the likelihood function</span>
+        <span class="c1"># this makes debugging easier by failing early with meaningful errors</span>
+        
+        <span class="c1"># test with num_test_samples random points</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_test_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">transform</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">u</span>
+        <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_test_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,),</span> <span class="p">(</span><span class="s2">&quot;Error in transform function: returned shape is </span><span class="si">%s</span><span class="s2">, expected </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+        <span class="n">logl</span> <span class="o">=</span> <span class="n">loglike</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">u</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">u</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="p">(</span><span class="s2">&quot;Error in transform function: u was modified!&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">logl</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_test_samples</span><span class="p">,),</span> <span class="p">(</span><span class="s2">&quot;Error in loglikelihood function: returned shape is </span><span class="si">%s</span><span class="s2">, expected </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">logl</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">num_test_samples</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">logl</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(),</span> <span class="p">(</span><span class="s2">&quot;Error in loglikelihood function: returned non-finite number: </span><span class="si">%s</span><span class="s2"> for input u=</span><span class="si">%s</span><span class="s2"> p=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">logl</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="o">=</span> <span class="n">loglike</span>
+
+        <span class="k">if</span> <span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span>
+
+    <span class="k">def</span> <span class="nf">_setup_distributed_seeds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">)</span>
+
+        <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># from http://arxiv.org/abs/1005.4117</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(((</span><span class="n">seed</span> <span class="o">*</span> <span class="mi">181</span><span class="p">)</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">-</span> <span class="mi">83</span><span class="p">)</span> <span class="o">*</span> <span class="mi">359</span><span class="p">))</span> <span class="o">%</span> <span class="mi">104729</span><span class="p">))</span>
+            <span class="c1"># print(&#39;setting seed:&#39;, self.mpi_rank, seed)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_emcee_logprob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">u</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">((</span><span class="n">u</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">u</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">L</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">L</span>
+
+<div class="viewcode-block" id="ReactiveAffineInvariantSampler.find_starting_walkers"><a class="viewcode-back" href="../autoemcee.html#autoemcee.ReactiveAffineInvariantSampler.find_starting_walkers">[docs]</a>    <span class="k">def</span> <span class="nf">find_starting_walkers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_global_samples</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">num_global_samples</span> <span class="o">&gt;</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="p">(</span><span class="n">num_global_samples</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">)</span>
+
+        <span class="n">ndim</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;global sampling for starting point ...&quot;</span><span class="p">)</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_global_samples</span><span class="p">,</span> <span class="n">ndim</span><span class="p">))</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">transform</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">loglike</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="c1"># find indices of the highest likelihood ones</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">L</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="n">num_walkers</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ReactiveAffineInvariantSampler.run"><a class="viewcode-back" href="../autoemcee.html#autoemcee.ReactiveAffineInvariantSampler.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">num_global_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+            <span class="n">num_chains</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">num_walkers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">max_ncalls</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span>
+            <span class="n">min_ess</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+            <span class="n">max_improvement_loops</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">num_initial_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">min_autocorr_times</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sample at least *min_ess* effective samples have been drawn.</span>
+
+<span class="sd">        The steps are:</span>
+
+<span class="sd">        1. Draw *num_global_samples* from prior. The highest *num_walkers* points are selected.</span>
+<span class="sd">        2. Optimize to find maximum likelihood point.</span>
+<span class="sd">        3. Estimate local covariance with finite differences.</span>
+<span class="sd">        4. Importance sample from Laplace approximation (with *num_gauss_samples*).</span>
+<span class="sd">        5. Construct Gaussian mixture model from samples</span>
+<span class="sd">        6. Simplify Gaussian mixture model with Variational Bayes</span>
+<span class="sd">        7. Importance sample from mixture model</span>
+
+<span class="sd">        Steps 5-7 are repeated (*max_improvement_loops* times).</span>
+<span class="sd">        Steps 2-3 are performed with MINUIT, Steps 3-6</span>
+<span class="sd">        are performed with pypmc.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        min_ess: float</span>
+<span class="sd">            Number of effective samples to draw</span>
+<span class="sd">        max_ncalls: int</span>
+<span class="sd">            Maximum number of likelihood function evaluations</span>
+<span class="sd">        max_improvement_loops: int</span>
+<span class="sd">            Number of times the proposal should be improved</span>
+
+<span class="sd">        num_gauss_samples: int</span>
+<span class="sd">            Number of samples to draw from initial Gaussian likelihood approximation before</span>
+<span class="sd">            improving the approximation.</span>
+<span class="sd">        num_global_samples: int</span>
+<span class="sd">            Number of samples to draw from the prior to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">num_walkers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_walkers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_initial_steps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="n">num_chains</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_size</span>
+            <span class="n">num_chains_here</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">num_chains_here</span> <span class="o">=</span> <span class="n">num_chains</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;finding starting points and running initial </span><span class="si">%d</span><span class="s2"> MCMC steps&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_chains_here</span><span class="p">):</span>
+            <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_starting_walkers</span><span class="p">(</span><span class="n">num_global_samples</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">)</span>
+            
+            <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
+            <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_global_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_improvement_loops</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;checking convergence (iteration </span><span class="si">%d</span><span class="s2">) ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">converged</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># check state of chains:</span>
+            <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">:</span>
+                <span class="n">chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()</span>
+                <span class="k">assert</span> <span class="n">chain</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+                <span class="n">accepts</span> <span class="o">=</span> <span class="p">(</span><span class="n">chain</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">!=</span> <span class="n">chain</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">accepts</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">accepts</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;acceptance rates: </span><span class="si">%s</span><span class="s2"> (worst few)&quot;</span><span class="p">,</span> <span class="n">accepts</span><span class="p">[</span><span class="n">i</span><span class="p">[:</span><span class="mi">8</span><span class="p">]]</span> <span class="o">*</span> <span class="mf">100.</span> <span class="o">/</span> <span class="n">num_steps</span><span class="p">)</span>
+                
+                <span class="c1"># flatchain = sampler.get_chain(flat=True)</span>
+                
+                <span class="c1"># diagnose this chain</span>
+                
+                <span class="c1"># 0. analyse each variable</span>
+                <span class="c1"># max_autocorrlength = 1</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
+                    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                    chain_variable = chain[:, :, i]</span>
+<span class="sd">                    # 1. treat each walker as a independent chain</span>
+<span class="sd">                    try:</span>
+<span class="sd">                        for w in range(num_walkers):</span>
+<span class="sd">                            chain_walker = chain_variable[:, w]</span>
+<span class="sd">                            with warnings.catch_warnings():</span>
+<span class="sd">                                warnings.simplefilter(&quot;ignore&quot;)</span>
+<span class="sd">                                tau = emcee.autocorr.integrated_time(chain_walker, c=5, tol=50, quiet=False)</span>
+<span class="sd">                                tau = max(tau, 1)</span>
+<span class="sd">                            max_autocorrlength = max(max_autocorrlength, tau)</span>
+<span class="sd">                            if len(chain_walker) / tau &lt; min_autocorr_times:</span>
+<span class="sd">                                self.logger.debug(&quot;autocorrelation is long for parameter &#39;%s&#39;: tau=%.1f -&gt; %dx lengths&quot; % (self.paramnames[i], tau, num_steps / tau))</span>
+<span class="sd">                                converged = False</span>
+<span class="sd">                                break</span>
+<span class="sd">                    except emcee.autocorr.AutocorrError:</span>
+<span class="sd">                        max_autocorrlength = np.inf</span>
+<span class="sd">                        self.logger.debug(&quot;autocorrelation is too long for parameter &#39;%s&#39; to be estimated&quot; % (self.paramnames[i]))</span>
+<span class="sd">                        converged = False</span>
+<span class="sd">                        break</span>
+
+<span class="sd">                    if not converged:</span>
+<span class="sd">                        break</span>
+<span class="sd">                    &quot;&quot;&quot;</span>
+
+                    <span class="c1"># secondly, detect drift with geweke</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="o">-</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span>
+                    <span class="n">geweke_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>
+                    <span class="k">if</span> <span class="n">geweke_z</span> <span class="o">&gt;</span> <span class="mf">2.</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;geweke drift (z=</span><span class="si">%.1f</span><span class="s2">) detected for parameter &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geweke_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                        <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+                    
+                <span class="c1">#self.logger.debug(&quot;autocorrelation length: tau=%.1f -&gt; %dx lengths&quot; % (max_autocorrlength, num_steps / max_autocorrlength))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
+                    <span class="k">break</span>
+            
+            <span class="c1"># merge converged across MPI chains</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+                <span class="n">recv_converged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">converged</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">recv_converged</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            
+            
+            <span class="k">if</span> <span class="n">converged</span><span class="p">:</span>
+                <span class="c1"># finally, gelman-rubin diagnostic on chains</span>
+                <span class="n">chains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+                    <span class="n">recv_chains</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">chains</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">chains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">recv_chains</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+                <span class="k">assert</span> <span class="n">chains</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_chains</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">chains</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">num_chains</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+
+                <span class="n">rhat</span> <span class="o">=</span> <span class="n">arviz</span><span class="o">.</span><span class="n">rhat</span><span class="p">(</span><span class="n">arviz</span><span class="o">.</span><span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">chains</span><span class="p">))</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;rhat chain diagnostic: </span><span class="si">%s</span><span class="s2"> (&lt;1.2 is good)&quot;</span><span class="p">,</span> <span class="n">rhat</span><span class="p">)</span>
+                <span class="n">converged</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">rhat</span> <span class="o">&lt;</span> <span class="mf">1.2</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+                    <span class="n">converged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">converged</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;converged!!!&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">&gt;</span> <span class="n">max_ncalls</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;maximum number of likelihood calls reached&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+                
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;not converged yet at iteration </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="c1">#self.logger.error(&quot;error at iteration %d&quot; % (it+1))</span>
+            <span class="n">last_num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
+            <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_num_steps</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">last_num_steps</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_walkers</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running </span><span class="si">%d</span><span class="s2"> MCMC steps ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">:</span>
+                <span class="n">chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="c1"># get a scale small compared to the width of the current posterior</span>
+                <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">1e-30</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">std</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,),</span> <span class="n">std</span><span class="o">.</span><span class="n">shape</span>
+                
+                <span class="c1"># sample num_walkers points from chain, proportional to likelihood</span>
+                <span class="n">L</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_log_prob</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">L</span> <span class="o">-</span> <span class="n">L</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span> <span class="o">/</span> <span class="n">p</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="c1"># select points</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">chain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">1e-10</span><span class="p">)</span>
+                <span class="c1"># add a bit of noise</span>
+                <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="n">u</span> <span class="o">+</span> <span class="n">noise</span>
+                <span class="c1"># avoid border</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">1e-10</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">u</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
+                
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting at </span><span class="si">%s</span><span class="s2"> +- </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">u</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                <span class="n">sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+                <span class="c1">#self.logger.info(&quot;not converged yet at iteration %d&quot; % (it+1))</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">last_num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+                <span class="n">sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+                <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">eqsamples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eqsamples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="n">recv_eqsamples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">eqsamples</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">eqsamples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">recv_eqsamples</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">paramnames</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">,</span>
+            <span class="n">posterior</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">mean</span><span class="o">=</span><span class="n">eqsamples</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">stdev</span><span class="o">=</span><span class="n">eqsamples</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">median</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">eqsamples</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">errlo</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">eqsamples</span><span class="p">,</span> <span class="mf">15.8655</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                <span class="n">errup</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">eqsamples</span><span class="p">,</span> <span class="mf">84.1345</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="p">),</span>
+            <span class="n">samples</span><span class="o">=</span><span class="n">eqsamples</span><span class="p">,</span>
+            <span class="n">ncall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span></div>
+        
+<div class="viewcode-block" id="ReactiveAffineInvariantSampler.print_results"><a class="viewcode-back" href="../autoemcee.html#autoemcee.ReactiveAffineInvariantSampler.print_results">[docs]</a>    <span class="k">def</span> <span class="nf">print_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;&quot;</span> <span class="s2">&quot;Give summary of marginal likelihood and parameters.&quot;&quot; &quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">):</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">][:,</span> <span class="n">i</span><span class="p">]</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+                <span class="n">med</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sigma</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="n">i</span>
+                <span class="n">fmts</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;    </span><span class="si">%-20s</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">fmt</span> <span class="o">+</span> <span class="s2">&quot; +- &quot;</span> <span class="o">+</span> <span class="n">fmt</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">fmts</span> <span class="o">%</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">med</span><span class="p">,</span> <span class="n">sigma</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ReactiveAffineInvariantSampler.plot"><a class="viewcode-back" href="../autoemcee.html#autoemcee.ReactiveAffineInvariantSampler.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="n">corner</span><span class="o">.</span><span class="n">corner</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">],</span>
+                <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">],</span>
+                <span class="n">show_titles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Johannes Buchner
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

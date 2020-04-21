@@ -1,6 +1,7 @@
 numpy
 emcee
 arviz
+corner
 flake8
 coveralls
 pytest-html

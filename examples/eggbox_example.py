@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from numpy import pi, cos, log
 import matplotlib.pyplot as plt
+import logging, sys
 
 def main(args):
 
@@ -16,15 +17,20 @@ def main(args):
 
     def transform(x):
         return x * 10 * pi
-        
-    from autoemcee import ReactiveAffineInvariantSampler
     
-    sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, vectorized=True)
+    from autoemcee import ReactiveAffineInvariantSampler, create_logger
+    
+    create_logger('autoemcee', level=logging.ERROR)
+    sampler = ReactiveAffineInvariantSampler(
+        paramnames, loglike, transform=transform, 
+        vectorized=True,
+        sampler=args.sampler)
     
     sampler.run(
         #num_chains=4,
         #max_improvement_loops=2,
         max_ncalls=1000000,
+        min_autocorr_times=1,
     )
     if sampler.mpi_rank != 0:
         return
@@ -47,5 +53,6 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--sampler', required=True, choices=['goodman-weare', 'slice'])
     args = parser.parse_args()
     main(args)

@@ -16,7 +16,6 @@ def test_run():
     def transform(x):
         assert len(x) == len(paramnames)
         return 10. * x - 5.
-    
 
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, sampler='goodman-weare')
     r = sampler.run(max_improvement_loops=1)

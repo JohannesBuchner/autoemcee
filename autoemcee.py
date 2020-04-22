@@ -11,6 +11,7 @@ import corner
 
 import numpy as np
 
+import emcee
 import arviz
 
 __all__ = ['ReactiveAffineInvariantSampler']
@@ -31,6 +32,7 @@ def create_logger(module_name, log_dir=None, level=logging.INFO):
     registered.
     """
     logger = logging.getLogger(str(module_name))
+    logger.setLevel(logging.DEBUG)
     first_logger = logger.handlers == []
     if log_dir is not None and first_logger:
         # create file handler which logs even debug messages
@@ -47,7 +49,7 @@ def create_logger(module_name, log_dir=None, level=logging.INFO):
         handler.setLevel(level)
         formatter = logging.Formatter('[{}] %(message)s'.format(module_name))
         handler.setFormatter(formatter)
-        logger.setLevel(level)
+        #logger.setLevel(level)
         logger.addHandler(handler)
 
     return logger
@@ -74,7 +76,7 @@ class ReactiveAffineInvariantSampler(object):
                  vectorized=False,
                  sampler='goodman-weare',
                  ):
-        """Initialise Affine-Invariant sampler.
+        """Initialise sampler.
 
         Parameters
         -----------
@@ -106,6 +108,8 @@ class ReactiveAffineInvariantSampler(object):
         self.ncall = 0
         self.use_mpi = False
         self.sampler = sampler
+        if sampler not in ('goodman-weare', 'slice'):
+            raise ValueError("sampler needs to be one of ('goodman-weare', 'slice')")
         try:
             from mpi4py import MPI
             self.comm = MPI.COMM_WORLD
@@ -119,8 +123,7 @@ class ReactiveAffineInvariantSampler(object):
             self.mpi_rank = 0
         
         self.log = self.mpi_rank == 0
-        if self.log:
-            self.logger = create_logger('autoemcee')
+        self.logger = create_logger('autoemcee')
 
         if not vectorized:
             loglike = vectorize(loglike)
@@ -202,45 +205,51 @@ class ReactiveAffineInvariantSampler(object):
             num_chains=4,
             num_walkers=None,
             max_ncalls=1000000,
-            min_ess=400,
             max_improvement_loops=4,
             num_initial_steps=100,
-            min_autocorr_times=50,
-            verbose=True):
-        """Sample at least *min_ess* effective samples have been drawn.
+            min_autocorr_times=0,
+            progress=True):
+        """Sample until MCMC chains have converged.
 
         The steps are:
 
         1. Draw *num_global_samples* from prior. The highest *num_walkers* points are selected.
-        2. Optimize to find maximum likelihood point.
-        3. Estimate local covariance with finite differences.
-        4. Importance sample from Laplace approximation (with *num_gauss_samples*).
-        5. Construct Gaussian mixture model from samples
-        6. Simplify Gaussian mixture model with Variational Bayes
-        7. Importance sample from mixture model
+        2. Set *num_steps* to *num_initial_steps*
+        3. Run *num_chains* MCMC ensembles for *num_steps* steps
+        4. For each walker chain, compute auto-correlation length (Convergence requires *num_steps*/autocorrelation length > *min_autocorr_times*)
+        5. For each parameter, compute geweke convergence diagnostic (Convergence requires |z| < 2)
+        6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat<1.2)
+        7. If converged, stop and return results. 
+        8. Increase *num_steps* by 10, and repeat from (3) up to *max_improvement_loops* times.
 
-        Steps 5-7 are repeated (*max_improvement_loops* times).
-        Steps 2-3 are performed with MINUIT, Steps 3-6
-        are performed with pypmc.
 
         Parameters
         ----------
-        min_ess: float
-            Number of effective samples to draw
-        max_ncalls: int
-            Maximum number of likelihood function evaluations
-        max_improvement_loops: int
-            Number of times the proposal should be improved
 
-        num_gauss_samples: int
-            Number of samples to draw from initial Gaussian likelihood approximation before
-            improving the approximation.
         num_global_samples: int
             Number of samples to draw from the prior to
+        num_chains: int
+            Number of independent ensembles to run. If running with MPI,
+            this is set to the number of MPI processes.
+        num_walkers: int
+            Ensemble size. If None, max(100, 4 * dim) is used
+        max_ncalls: int
+            Maximum number of likelihood function evaluations
+        num_initial_steps: int
+            Number of sampler steps to take in first iteration
+        max_improvement_loops: int
+            Number of times MCMC should be re-attempted (see above)
+        min_autocorr_times: float
+            if positive, additionally require for convergence that the 
+            number of samples is larger than the *min_autocorr_times*
+            times the autocorrelation length.
+        progress: bool
+            if True, show progress bars
+
         """
         
         if num_walkers is None:
-            num_walkers = max(100, 2 * self.x_dim)
+            num_walkers = max(100, 4 * self.x_dim)
 
         num_steps = num_initial_steps
         if self.use_mpi:
@@ -257,13 +266,12 @@ class ReactiveAffineInvariantSampler(object):
             u, p, L = self.find_starting_walkers(num_global_samples, num_walkers)
             
             if self.sampler == 'goodman-weare':
-                import emcee
                 sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
-            if self.sampler == 'slice':
+            elif self.sampler == 'slice':
                 import zeus
                 sampler = zeus.sampler(nwalkers=num_walkers, ndim=self.x_dim, logprob=self._emcee_logprob, vectorize=True)
             self.samplers.append(sampler)
-            sampler.run_mcmc(u, num_steps, progress=self.log)
+            sampler.run_mcmc(u, num_steps, progress=self.log and progress)
         
         self.ncall += num_chains * (num_global_samples + (num_steps + 1) * num_walkers)
         
@@ -286,9 +294,8 @@ class ReactiveAffineInvariantSampler(object):
                 # diagnose this chain
                 
                 # 0. analyse each variable
-                # max_autocorrlength = 1
+                max_autocorrlength = 1
                 for i in range(self.x_dim):
-                    """
                     chain_variable = chain[:, :, i]
                     # 1. treat each walker as a independent chain
                     try:
@@ -305,13 +312,13 @@ class ReactiveAffineInvariantSampler(object):
                                 break
                     except emcee.autocorr.AutocorrError:
                         max_autocorrlength = np.inf
-                        self.logger.debug("autocorrelation is too long for parameter '%s' to be estimated" % (self.paramnames[i]))
-                        converged = False
-                        break
+                        if min_autocorr_times > 0:
+                            self.logger.debug("autocorrelation is too long for parameter '%s' to be estimated" % (self.paramnames[i]))
+                            converged = False
+                            break
 
                     if not converged:
                         break
-                    """
 
                     # secondly, detect drift with geweke
                     a = sampler.get_chain(flat=True)[:num_steps // 4, i]
@@ -321,7 +328,7 @@ class ReactiveAffineInvariantSampler(object):
                         self.logger.debug("geweke drift (z=%.1f) detected for parameter '%s'" % (geweke_z, self.paramnames[i]))
                         converged = False
                     
-                #self.logger.debug("autocorrelation length: tau=%.1f -> %dx lengths" % (max_autocorrlength, num_steps / max_autocorrlength))
+                self.logger.debug("autocorrelation length: tau=%.1f -> %dx lengths" % (max_autocorrlength, num_steps / max_autocorrlength))
                 if not converged:
                     break
             
@@ -392,9 +399,10 @@ class ReactiveAffineInvariantSampler(object):
                 sampler.reset()
                 #self.logger.info("not converged yet at iteration %d" % (it+1))
                 sampler.run_mcmc(u, last_num_steps, progress=self.log)
-                last_samples = sampler.chain[-1, :, :]
+                last_samples = sampler.get_chain()[-1, :, :]
+                assert last_samples.shape == (num_walkers, self.x_dim), (last_samples.shape, (num_walkers, self.x_dim))
                 sampler.reset()
-                sampler.run_mcmc(last_samples, num_steps, progress=self.log)
+                sampler.run_mcmc(last_samples, num_steps, progress=self.log and progress)
 
         if self.transform is None:
             eqsamples = np.concatenate([sampler.get_chain(flat=True) for sampler in self.samplers])

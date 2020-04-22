@@ -213,6 +213,7 @@
         <span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
         <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">] </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">module_name</span><span class="p">))</span>
         <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="c1">#logger.setLevel(level)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">logger</span>
@@ -237,8 +238,9 @@
                  <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">num_test_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                  <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">sampler</span><span class="o">=</span><span class="s1">&#39;goodman-weare&#39;</span><span class="p">,</span>
                  <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialise Affine-Invariant sampler.</span>
+        <span class="sd">&quot;&quot;&quot;Initialise sampler.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
@@ -251,6 +253,11 @@
 <span class="sd">        transform: function</span>
 <span class="sd">            parameter transform from unit cube to physical parameters.</span>
 <span class="sd">            Receives multiple cube vectors, returns multiple parameter vectors.</span>
+<span class="sd">        sampler: str</span>
+<span class="sd">            if &#39;goodman-weare&#39;: use Goodman &amp; Weare&#39;s affine invariant MCMC ensemble sampler</span>
+<span class="sd">            if &#39;slice&#39;: use Karamanis &amp; Beutler (2020)&#39;s ensemble slice sampler</span>
+<span class="sd">        vectorized: bool</span>
+<span class="sd">            if true, likelihood and transform receive arrays of points, and return arrays</span>
 
 <span class="sd">        num_test_samples: int</span>
 <span class="sd">            test transform and likelihood with this number of</span>
@@ -264,6 +271,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">=</span> <span class="n">sampler</span>
+        <span class="k">if</span> <span class="n">sampler</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;goodman-weare&#39;</span><span class="p">,</span> <span class="s1">&#39;slice&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sampler needs to be one of (&#39;goodman-weare&#39;, &#39;slice&#39;)&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
@@ -277,8 +287,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">=</span> <span class="mi">0</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_rank</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">create_logger</span><span class="p">(</span><span class="s1">&#39;autoemcee&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">create_logger</span><span class="p">(</span><span class="s1">&#39;autoemcee&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">vectorized</span><span class="p">:</span>
             <span class="n">loglike</span> <span class="o">=</span> <span class="n">vectorize</span><span class="p">(</span><span class="n">loglike</span><span class="p">)</span>
@@ -360,45 +369,51 @@
             <span class="n">num_chains</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">num_walkers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">max_ncalls</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span>
-            <span class="n">min_ess</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
             <span class="n">max_improvement_loops</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">num_initial_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-            <span class="n">min_autocorr_times</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sample at least *min_ess* effective samples have been drawn.</span>
+            <span class="n">min_autocorr_times</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sample until MCMC chains have converged.</span>
 
 <span class="sd">        The steps are:</span>
 
 <span class="sd">        1. Draw *num_global_samples* from prior. The highest *num_walkers* points are selected.</span>
-<span class="sd">        2. Optimize to find maximum likelihood point.</span>
-<span class="sd">        3. Estimate local covariance with finite differences.</span>
-<span class="sd">        4. Importance sample from Laplace approximation (with *num_gauss_samples*).</span>
-<span class="sd">        5. Construct Gaussian mixture model from samples</span>
-<span class="sd">        6. Simplify Gaussian mixture model with Variational Bayes</span>
-<span class="sd">        7. Importance sample from mixture model</span>
+<span class="sd">        2. Set *num_steps* to *num_initial_steps*</span>
+<span class="sd">        3. Run *num_chains* MCMC ensembles for *num_steps* steps</span>
+<span class="sd">        4. For each walker chain, compute auto-correlation length (Convergence requires *num_steps*/autocorrelation length &gt; *min_autocorr_times*)</span>
+<span class="sd">        5. For each parameter, compute geweke convergence diagnostic (Convergence requires \|z\| &lt; 2)</span>
+<span class="sd">        6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat&lt;1.2)</span>
+<span class="sd">        7. If converged, stop and return results. </span>
+<span class="sd">        8. Increase *num_steps* by 10, and repeat from (3) up to *max_improvement_loops* times.</span>
 
-<span class="sd">        Steps 5-7 are repeated (*max_improvement_loops* times).</span>
-<span class="sd">        Steps 2-3 are performed with MINUIT, Steps 3-6</span>
-<span class="sd">        are performed with pypmc.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        min_ess: float</span>
-<span class="sd">            Number of effective samples to draw</span>
-<span class="sd">        max_ncalls: int</span>
-<span class="sd">            Maximum number of likelihood function evaluations</span>
-<span class="sd">        max_improvement_loops: int</span>
-<span class="sd">            Number of times the proposal should be improved</span>
 
-<span class="sd">        num_gauss_samples: int</span>
-<span class="sd">            Number of samples to draw from initial Gaussian likelihood approximation before</span>
-<span class="sd">            improving the approximation.</span>
 <span class="sd">        num_global_samples: int</span>
 <span class="sd">            Number of samples to draw from the prior to</span>
+<span class="sd">        num_chains: int</span>
+<span class="sd">            Number of independent ensembles to run. If running with MPI,</span>
+<span class="sd">            this is set to the number of MPI processes.</span>
+<span class="sd">        num_walkers: int</span>
+<span class="sd">            Ensemble size. If None, max(100, 4 * dim) is used</span>
+<span class="sd">        max_ncalls: int</span>
+<span class="sd">            Maximum number of likelihood function evaluations</span>
+<span class="sd">        num_initial_steps: int</span>
+<span class="sd">            Number of sampler steps to take in first iteration</span>
+<span class="sd">        max_improvement_loops: int</span>
+<span class="sd">            Number of times MCMC should be re-attempted (see above)</span>
+<span class="sd">        min_autocorr_times: float</span>
+<span class="sd">            if positive, additionally require for convergence that the </span>
+<span class="sd">            number of samples is larger than the *min_autocorr_times*</span>
+<span class="sd">            times the autocorrelation length.</span>
+<span class="sd">        progress: bool</span>
+<span class="sd">            if True, show progress bars</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">num_walkers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">num_walkers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+            <span class="n">num_walkers</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
 
         <span class="n">num_steps</span> <span class="o">=</span> <span class="n">num_initial_steps</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
@@ -414,9 +429,13 @@
         <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_chains_here</span><span class="p">):</span>
             <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_starting_walkers</span><span class="p">(</span><span class="n">num_global_samples</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">)</span>
             
-            <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">==</span> <span class="s1">&#39;goodman-weare&#39;</span><span class="p">:</span>
+                <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">==</span> <span class="s1">&#39;slice&#39;</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">zeus</span>
+                <span class="n">sampler</span> <span class="o">=</span> <span class="n">zeus</span><span class="o">.</span><span class="n">sampler</span><span class="p">(</span><span class="n">nwalkers</span><span class="o">=</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">logprob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
-            <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+            <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="n">progress</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_global_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">)</span>
         
@@ -427,7 +446,7 @@
             <span class="c1"># check state of chains:</span>
             <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">:</span>
                 <span class="n">chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()</span>
-                <span class="k">assert</span> <span class="n">chain</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">chain</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
                 <span class="n">accepts</span> <span class="o">=</span> <span class="p">(</span><span class="n">chain</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">!=</span> <span class="n">chain</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="n">accepts</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
@@ -439,32 +458,31 @@
                 <span class="c1"># diagnose this chain</span>
                 
                 <span class="c1"># 0. analyse each variable</span>
-                <span class="c1"># max_autocorrlength = 1</span>
+                <span class="n">max_autocorrlength</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">):</span>
-                    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">                    chain_variable = chain[:, :, i]</span>
-<span class="sd">                    # 1. treat each walker as a independent chain</span>
-<span class="sd">                    try:</span>
-<span class="sd">                        for w in range(num_walkers):</span>
-<span class="sd">                            chain_walker = chain_variable[:, w]</span>
-<span class="sd">                            with warnings.catch_warnings():</span>
-<span class="sd">                                warnings.simplefilter(&quot;ignore&quot;)</span>
-<span class="sd">                                tau = emcee.autocorr.integrated_time(chain_walker, c=5, tol=50, quiet=False)</span>
-<span class="sd">                                tau = max(tau, 1)</span>
-<span class="sd">                            max_autocorrlength = max(max_autocorrlength, tau)</span>
-<span class="sd">                            if len(chain_walker) / tau &lt; min_autocorr_times:</span>
-<span class="sd">                                self.logger.debug(&quot;autocorrelation is long for parameter &#39;%s&#39;: tau=%.1f -&gt; %dx lengths&quot; % (self.paramnames[i], tau, num_steps / tau))</span>
-<span class="sd">                                converged = False</span>
-<span class="sd">                                break</span>
-<span class="sd">                    except emcee.autocorr.AutocorrError:</span>
-<span class="sd">                        max_autocorrlength = np.inf</span>
-<span class="sd">                        self.logger.debug(&quot;autocorrelation is too long for parameter &#39;%s&#39; to be estimated&quot; % (self.paramnames[i]))</span>
-<span class="sd">                        converged = False</span>
-<span class="sd">                        break</span>
+                    <span class="n">chain_variable</span> <span class="o">=</span> <span class="n">chain</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span>
+                    <span class="c1"># 1. treat each walker as a independent chain</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">):</span>
+                            <span class="n">chain_walker</span> <span class="o">=</span> <span class="n">chain_variable</span><span class="p">[:,</span> <span class="n">w</span><span class="p">]</span>
+                            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+                                <span class="n">tau</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">autocorr</span><span class="o">.</span><span class="n">integrated_time</span><span class="p">(</span><span class="n">chain_walker</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                                <span class="n">tau</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="n">max_autocorrlength</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_autocorrlength</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chain_walker</span><span class="p">)</span> <span class="o">/</span> <span class="n">tau</span> <span class="o">&lt;</span> <span class="n">min_autocorr_times</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;autocorrelation is long for parameter &#39;</span><span class="si">%s</span><span class="s2">&#39;: tau=</span><span class="si">%.1f</span><span class="s2"> -&gt; </span><span class="si">%d</span><span class="s2">x lengths&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tau</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">/</span> <span class="n">tau</span><span class="p">))</span>
+                                <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">break</span>
+                    <span class="k">except</span> <span class="n">emcee</span><span class="o">.</span><span class="n">autocorr</span><span class="o">.</span><span class="n">AutocorrError</span><span class="p">:</span>
+                        <span class="n">max_autocorrlength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                        <span class="k">if</span> <span class="n">min_autocorr_times</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;autocorrelation is too long for parameter &#39;</span><span class="si">%s</span><span class="s2">&#39; to be estimated&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                            <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
 
-<span class="sd">                    if not converged:</span>
-<span class="sd">                        break</span>
-<span class="sd">                    &quot;&quot;&quot;</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
+                        <span class="k">break</span>
 
                     <span class="c1"># secondly, detect drift with geweke</span>
                     <span class="n">a</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
@@ -474,7 +492,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;geweke drift (z=</span><span class="si">%.1f</span><span class="s2">) detected for parameter &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geweke_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                         <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
                     
-                <span class="c1">#self.logger.debug(&quot;autocorrelation length: tau=%.1f -&gt; %dx lengths&quot; % (max_autocorrlength, num_steps / max_autocorrlength))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;autocorrelation length: tau=</span><span class="si">%.1f</span><span class="s2"> -&gt; </span><span class="si">%d</span><span class="s2">x lengths&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">max_autocorrlength</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">/</span> <span class="n">max_autocorrlength</span><span class="p">))</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
                     <span class="k">break</span>
             
@@ -544,9 +562,11 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting at </span><span class="si">%s</span><span class="s2"> +- </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">u</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
                 <span class="n">sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
                 <span class="c1">#self.logger.info(&quot;not converged yet at iteration %d&quot; % (it+1))</span>
-                <span class="n">state</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">last_num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+                <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">last_num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+                <span class="n">last_samples</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+                <span class="k">assert</span> <span class="n">last_samples</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">last_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
                 <span class="n">sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-                <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+                <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">last_samples</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="n">progress</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">eqsamples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">])</span>

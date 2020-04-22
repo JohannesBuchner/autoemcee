@@ -196,10 +196,10 @@
 <p>Calculates the Bayesian evidence and posterior samples of arbitrary monomodal models.</p>
 <dl class="class">
 <dt id="autoemcee.ReactiveAffineInvariantSampler">
-<em class="property">class </em><code class="sig-prename descclassname">autoemcee.</code><code class="sig-name descname">ReactiveAffineInvariantSampler</code><span class="sig-paren">(</span><em class="sig-param">param_names</em>, <em class="sig-param">loglike</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">num_test_samples=2</em>, <em class="sig-param">vectorized=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autoemcee.</code><code class="sig-name descname">ReactiveAffineInvariantSampler</code><span class="sig-paren">(</span><em class="sig-param">param_names</em>, <em class="sig-param">loglike</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">num_test_samples=2</em>, <em class="sig-param">vectorized=False</em>, <em class="sig-param">sampler='goodman-weare'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Emcee sampler with reactive exploration strategy.</p>
-<p>Initialise Affine-Invariant sampler.</p>
+<p>Initialise sampler.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -208,6 +208,9 @@
 Receives multiple parameter vectors, returns vector of likelihood.</p></li>
 <li><p><strong>transform</strong> (<em>function</em>) – parameter transform from unit cube to physical parameters.
 Receives multiple cube vectors, returns multiple parameter vectors.</p></li>
+<li><p><strong>sampler</strong> (<em>str</em>) – if ‘goodman-weare’: use Goodman &amp; Weare’s affine invariant MCMC ensemble sampler
+if ‘slice’: use Karamanis &amp; Beutler (2020)’s ensemble slice sampler</p></li>
+<li><p><strong>vectorized</strong> (<em>bool</em>) – if true, likelihood and transform receive arrays of points, and return arrays</p></li>
 <li><p><strong>num_test_samples</strong> (<em>int</em>) – test transform and likelihood with this number of
 random points for errors first. Useful to catch bugs.</p></li>
 </ul>
@@ -220,30 +223,33 @@ random points for errors first. Useful to catch bugs.</p></li>
 
 <dl class="method">
 <dt id="autoemcee.ReactiveAffineInvariantSampler.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">num_global_samples=10000</em>, <em class="sig-param">num_chains=4</em>, <em class="sig-param">num_walkers=None</em>, <em class="sig-param">max_ncalls=1000000</em>, <em class="sig-param">min_ess=400</em>, <em class="sig-param">max_improvement_loops=4</em>, <em class="sig-param">num_initial_steps=100</em>, <em class="sig-param">min_autocorr_times=50</em>, <em class="sig-param">verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sample at least <em>min_ess</em> effective samples have been drawn.</p>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">num_global_samples=10000</em>, <em class="sig-param">num_chains=4</em>, <em class="sig-param">num_walkers=None</em>, <em class="sig-param">max_ncalls=1000000</em>, <em class="sig-param">max_improvement_loops=4</em>, <em class="sig-param">num_initial_steps=100</em>, <em class="sig-param">min_autocorr_times=0</em>, <em class="sig-param">progress=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample until MCMC chains have converged.</p>
 <p>The steps are:</p>
 <ol class="arabic simple">
 <li><p>Draw <em>num_global_samples</em> from prior. The highest <em>num_walkers</em> points are selected.</p></li>
-<li><p>Optimize to find maximum likelihood point.</p></li>
-<li><p>Estimate local covariance with finite differences.</p></li>
-<li><p>Importance sample from Laplace approximation (with <em>num_gauss_samples</em>).</p></li>
-<li><p>Construct Gaussian mixture model from samples</p></li>
-<li><p>Simplify Gaussian mixture model with Variational Bayes</p></li>
-<li><p>Importance sample from mixture model</p></li>
+<li><p>Set <em>num_steps</em> to <em>num_initial_steps</em></p></li>
+<li><p>Run <em>num_chains</em> MCMC ensembles for <em>num_steps</em> steps</p></li>
+<li><p>For each walker chain, compute auto-correlation length (Convergence requires <em>num_steps</em>/autocorrelation length &gt; <em>min_autocorr_times</em>)</p></li>
+<li><p>For each parameter, compute geweke convergence diagnostic (Convergence requires |z| &lt; 2)</p></li>
+<li><p>For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat&lt;1.2)</p></li>
+<li><p>If converged, stop and return results.</p></li>
+<li><p>Increase <em>num_steps</em> by 10, and repeat from (3) up to <em>max_improvement_loops</em> times.</p></li>
 </ol>
-<p>Steps 5-7 are repeated (<em>max_improvement_loops</em> times).
-Steps 2-3 are performed with MINUIT, Steps 3-6
-are performed with pypmc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>min_ess</strong> (<em>float</em>) – Number of effective samples to draw</p></li>
-<li><p><strong>max_ncalls</strong> (<em>int</em>) – Maximum number of likelihood function evaluations</p></li>
-<li><p><strong>max_improvement_loops</strong> (<em>int</em>) – Number of times the proposal should be improved</p></li>
-<li><p><strong>num_gauss_samples</strong> (<em>int</em>) – Number of samples to draw from initial Gaussian likelihood approximation before
-improving the approximation.</p></li>
 <li><p><strong>num_global_samples</strong> (<em>int</em>) – Number of samples to draw from the prior to</p></li>
+<li><p><strong>num_chains</strong> (<em>int</em>) – Number of independent ensembles to run. If running with MPI,
+this is set to the number of MPI processes.</p></li>
+<li><p><strong>num_walkers</strong> (<em>int</em>) – Ensemble size. If None, max(100, 4 * dim) is used</p></li>
+<li><p><strong>max_ncalls</strong> (<em>int</em>) – Maximum number of likelihood function evaluations</p></li>
+<li><p><strong>num_initial_steps</strong> (<em>int</em>) – Number of sampler steps to take in first iteration</p></li>
+<li><p><strong>max_improvement_loops</strong> (<em>int</em>) – Number of times MCMC should be re-attempted (see above)</p></li>
+<li><p><strong>min_autocorr_times</strong> (<em>float</em>) – if positive, additionally require for convergence that the
+number of samples is larger than the <em>min_autocorr_times</em>
+times the autocorrelation length.</p></li>
+<li><p><strong>progress</strong> (<em>bool</em>) – if True, show progress bars</p></li>
 </ul>
 </dd>
 </dl>

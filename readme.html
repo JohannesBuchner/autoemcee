@@ -200,7 +200,7 @@
 <p>Runs MCMC automatically to convergence.</p>
 <div class="section" id="about">
 <h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
-<p>Runs a family of Affine-Invariant Markov Chain Monte Carlo samplers (emcee)
+<p>Runs a family of Markov Chain Monte Carlo ensemble samplers (Affine-Invariant or Slice Sampler)
 with gradually increasing number of samples until they converge.</p>
 <p>Convergence is tested for each ensemble and for each parameter with the Geweke diagnostic.
 Additionally, across ensembles, the Gelman-Rubin r-hat is used.</p>
@@ -208,7 +208,7 @@ Additionally, across ensembles, the Gelman-Rubin r-hat is used.</p>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/autoemcee"><img alt="https://img.shields.io/pypi/v/autoemcee.svg" src="https://img.shields.io/pypi/v/autoemcee.svg" /></a>
 <a class="reference external image-reference" href="https://travis-ci.org/github/JohannesBuchner/autoemcee"><img alt="https://api.travis-ci.org/JohannesBuchner/autoemcee.svg?branch=master&amp;status=started" src="https://api.travis-ci.org/JohannesBuchner/autoemcee.svg?branch=master&amp;status=started" /></a>
 <a class="reference external image-reference" href="https://johannesbuchner.github.io/autoemcee/"><img alt="Documentation Status" src="https://img.shields.io/badge/docs-published-ok.svg" /></a>
-<p>This package is built on top of emcee, anviz and mpi4py.</p>
+<p>This package is built on top of emcee, zeus, anviz and mpi4py.</p>
 <p>You can help by testing autoemcee and reporting issues. Code contributions are welcome.
 See the <a class="reference external" href="https://johannesbuchner.github.io/autoemcee/contributing.html">Contributing page</a>.</p>
 </div>
@@ -217,13 +217,17 @@ See the <a class="reference external" href="https://johannesbuchner.github.io/au
 <ul class="simple">
 <li><p>Pythonic. pip installable.</p></li>
 <li><p>Easy to program for: Sanity checks with meaningful errors</p></li>
-<li><p>Fast</p></li>
+<li><p>Supports both emcee and zeus</p></li>
 <li><p>MPI support</p></li>
 </ul>
 <div class="section" id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
 <p>Read the full documentation at:</p>
 <p><a class="reference external" href="https://johannesbuchner.github.io/autoemcee/">https://johannesbuchner.github.io/autoemcee/</a></p>
+<p>For parallelisation, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mpiexec</span> <span class="o">-</span><span class="n">np</span> <span class="mi">4</span> <span class="n">python3</span> <span class="n">yourscript</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="licence">
 <h3>Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h3>

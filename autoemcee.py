@@ -269,7 +269,7 @@ class ReactiveAffineInvariantSampler(object):
                 sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
             elif self.sampler == 'slice':
                 import zeus
-                sampler = zeus.sampler(nwalkers=num_walkers, ndim=self.x_dim, logprob=self._emcee_logprob, vectorize=True)
+                sampler = zeus.sampler(nwalkers=num_walkers, ndim=self.x_dim, logprob_fn=self._emcee_logprob, vectorize=True)
             self.samplers.append(sampler)
             sampler.run_mcmc(u, num_steps, progress=self.log and progress)
         

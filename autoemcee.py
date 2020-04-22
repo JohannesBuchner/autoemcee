@@ -217,7 +217,7 @@ class ReactiveAffineInvariantSampler(object):
         2. Set *num_steps* to *num_initial_steps*
         3. Run *num_chains* MCMC ensembles for *num_steps* steps
         4. For each walker chain, compute auto-correlation length (Convergence requires *num_steps*/autocorrelation length > *min_autocorr_times*)
-        5. For each parameter, compute geweke convergence diagnostic (Convergence requires |z| < 2)
+        5. For each parameter, compute geweke convergence diagnostic (Convergence requires \|z\| < 2)
         6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat<1.2)
         7. If converged, stop and return results. 
         8. Increase *num_steps* by 10, and repeat from (3) up to *max_improvement_loops* times.

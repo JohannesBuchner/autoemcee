@@ -20,7 +20,7 @@ def main(args):
     
     from autoemcee import ReactiveAffineInvariantSampler, create_logger
     
-    create_logger('autoemcee', level=logging.ERROR)
+    create_logger('autoemcee', level=logging.DEBUG)
     sampler = ReactiveAffineInvariantSampler(
         paramnames, loglike, transform=transform, 
         vectorized=True,

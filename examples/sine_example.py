@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from numpy import pi, sin, log
 import matplotlib.pyplot as plt
+import logging, sys
 
 def main(args):
 
@@ -43,25 +44,27 @@ def main(args):
 
     loglike(transform(np.ones(ndim)*0.5))
     
-    from autoemcee import ReactiveAffineInvariantSampler
+    from autoemcee import ReactiveAffineInvariantSampler, create_logger
     
+    create_logger('autoemcee', level=logging.DEBUG)
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform)
     
     sampler.run(
-        num_global_samples=11,
-        num_chains=1,
-        num_walkers=10,
-        max_improvement_loops=40,
+        #num_global_samples=11,
+        #num_chains=1,
+        #num_walkers=10,
+        #max_improvement_loops=40,
     )
-    """
+    if sampler.mpi_rank != 0:
+        return
     sampler.print_results()
     
     from getdist import MCSamples, plots
 
     samples_g = MCSamples(samples=sampler.results['samples'],
                            names=sampler.results['paramnames'],
-                           label='Gaussian',
-                           settings=dict(smooth_scale_2D=3), sampler='nested')
+                           label='Sine',
+                           settings=dict(smooth_scale_2D=1))
 
     mcsamples = [samples_g]
     g = plots.get_subplot_plotter(width_inch=8)
@@ -69,7 +72,6 @@ def main(args):
     g.triangle_plot(mcsamples, filled=False, contour_colors=plt.cm.Set1.colors)
     plt.savefig('testsine_posterior.pdf', bbox_inches='tight')
     plt.close()
-    """
     
 
 if __name__ == '__main__':
@@ -79,6 +81,6 @@ if __name__ == '__main__':
                         help="Signal-to-Noise level")
     parser.add_argument('--ndata', type=int, default=40,
                         help="Number of simulated data points")
-
+    parser.add_argument('--sampler', required=True, choices=['goodman-weare', 'slice'])
     args = parser.parse_args()
     main(args)

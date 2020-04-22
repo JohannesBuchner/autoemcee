@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from numpy import pi, sin, log
 import matplotlib.pyplot as plt
+import logging, sys
 
 def main(args):
 
@@ -16,15 +17,16 @@ def main(args):
         logl = (-0.5 * log(2 * pi * sigma.reshape((1, -1))**2) - 0.5 * ((params - means.reshape((1, -1))) / sigma.reshape((1, -1)))**2).sum(axis=1)
         return logl
     
-    from autoemcee import ReactiveAffineInvariantSampler
+    from autoemcee import ReactiveAffineInvariantSampler, create_logger
     
+    create_logger('autoemcee', level=logging.DEBUG)
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, vectorized=True)
     
     sampler.run(
-        num_global_samples=11,
-        num_chains=4,
-        num_walkers=10,
-        max_improvement_loops=40,
+        #num_global_samples=10000,
+        #num_chains=4,
+        #num_walkers=10,
+        #max_improvement_loops=40,
     )
     if sampler.mpi_rank != 0:
         return
@@ -50,6 +52,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--x_dim', type=int, default=2,
                         help="Dimensionality")
+    parser.add_argument('--sampler', required=True, choices=['goodman-weare', 'slice'])
 
     args = parser.parse_args()
     main(args)

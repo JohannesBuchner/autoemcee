@@ -272,7 +272,7 @@ class ReactiveAffineInvariantSampler(object):
                 sampler = emcee.EnsembleSampler(num_walkers, self.x_dim, self._emcee_logprob, vectorize=True)
             elif self.sampler == 'slice':
                 import zeus
-                sampler = zeus.sampler(nwalkers=num_walkers, ndim=self.x_dim, logprob_fn=self._emcee_logprob, vectorize=True,
+                sampler = zeus.EnsembleSampler(nwalkers=num_walkers, ndim=self.x_dim, logprob_fn=self._emcee_logprob, vectorize=True,
                     maxiter=1e10, maxsteps=1e10)
             self.samplers.append(sampler)
             sampler.run_mcmc(u, num_steps, progress=self.log and progress)
@@ -283,6 +283,7 @@ class ReactiveAffineInvariantSampler(object):
             recv_ncall = self.comm.gather(self.ncall, root=0)
             ncall_here = sum(self.comm.bcast(recv_ncall, root=0))
 
+        assert ncall_here > 0, ncall_here
         self.ncall += ncall_here
 
         for it in range(max_improvement_loops):
@@ -297,7 +298,9 @@ class ReactiveAffineInvariantSampler(object):
                 assert accepts.shape == (num_walkers,)
                 if self.log:
                     i = np.argsort(accepts)
-                    self.logger.debug("acceptance rates: %s (worst few)", accepts[i[:8]] * 100. / num_steps)
+                    self.logger.debug(
+                        "acceptance rates: %s%% (worst few)", 
+                        (accepts[i[:8]] * 100. / (num_steps - 1)).astype(int))
                 
                 # diagnose this chain
                 
@@ -372,8 +375,7 @@ class ReactiveAffineInvariantSampler(object):
                 if self.log:
                     self.logger.warn("maximum number of likelihood calls reached")
                 break
-                
-            
+
             if self.log:
                 self.logger.info("not converged yet at iteration %d after %d evals" % (it + 1, self.ncall))
             #self.logger.error("error at iteration %d" % (it+1))
@@ -386,7 +388,8 @@ class ReactiveAffineInvariantSampler(object):
                     self.logger.warn("would need more likelihood calls (%d) than maximum (%d) for next step" % (next_ncalls, max_ncalls))
                 break
             
-            if num_chains * num_steps * num_walkers * self.x_dim * 4 >= 100000000:
+            self.logger.debug("expected memory usage: %.2f GiB" % (num_chains * num_steps * num_walkers * self.x_dim * 4 / 1024**3))
+            if num_chains * num_steps * num_walkers * self.x_dim * 4 >= 5 * 1024**3:
                 if self.log:
                     self.logger.warn("would need too much memory for next step")
                 break
@@ -398,7 +401,7 @@ class ReactiveAffineInvariantSampler(object):
                 #chain = sampler.get_chain(flat=True)
                 last_samples = sampler.get_chain()[-1, :, :]
                 # get a scale small compared to the width of the current posterior
-                std = np.clip(last_samples.std(axis=0) * 1e-5, a_min=1e-30, a_max=1e-1)
+                std = np.clip(last_samples.std(axis=0) / (num_walkers * self.x_dim), a_min=1e-30, a_max=1e-1)
                 assert std.shape == (self.x_dim,), std.shape
                 
                 # sample a point from last chain point
@@ -415,20 +418,20 @@ class ReactiveAffineInvariantSampler(object):
                 
                 if self.log:
                     self.logger.info("Starting at %s +- %s", u.mean(axis=0), u.std(axis=0))
-                ncall_here -= getattr(sampler, 'ncall', 0)
                 sampler.reset()
                 #self.logger.info("not converged yet at iteration %d" % (it+1))
+                
                 sampler.run_mcmc(u, last_num_steps, progress=self.log)
                 ncall_here += num_walkers
-                prev_ncall = getattr(sampler, 'ncall', 0)
-                ncall_here += getattr(sampler, 'ncall', last_num_steps * num_walkers) - prev_ncall
+                ncall_here += getattr(sampler, 'ncall', last_num_steps * num_walkers)
+                assert ncall_here > 0, ncall_here
                 last_samples = sampler.get_chain()[-1, :, :]
                 assert last_samples.shape == (num_walkers, self.x_dim), (last_samples.shape, (num_walkers, self.x_dim))
                 sampler.reset()
-                prev_ncall = getattr(sampler, 'ncall', 0)
                 sampler.run_mcmc(last_samples, num_steps, progress=self.log and progress)
                 ncall_here += num_walkers
-                ncall_here += getattr(sampler, 'ncall', num_steps * num_walkers) - prev_ncall
+                ncall_here += getattr(sampler, 'ncall', num_steps * num_walkers)
+                assert ncall_here > 0, (ncall_here, getattr(sampler, 'ncall', num_steps * num_walkers))
             
             if self.use_mpi:
                 recv_ncall = self.comm.gather(ncall_here, root=0)
@@ -457,7 +460,7 @@ class ReactiveAffineInvariantSampler(object):
                 errup=np.percentile(eqsamples, 84.1345, axis=0).tolist(),
             ),
             samples=eqsamples,
-            ncall = self.ncall,
+            ncall = int(self.ncall),
             converged = int(converged),
         )
         return self.results

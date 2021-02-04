@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>autoemcee &mdash; autoemcee 0.1.1 documentation</title>
+  <title>autoemcee &mdash; autoemcee 0.2.0 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
 
   
   
@@ -21,7 +24,9 @@
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -34,10 +39,6 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
@@ -53,7 +54,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> autoemcee
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> autoemcee
           
 
           
@@ -66,7 +67,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.2.0
               </div>
             
           
@@ -83,6 +84,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -104,6 +106,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -142,7 +145,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="index.html">Module code</a> &raquo;</li>
         
@@ -181,7 +184,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ReactiveAffineInvariantSampler&#39;</span><span class="p">]</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Johannes Buchner&quot;&quot;&quot;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;johannes.buchner.acad@gmx.com&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.1&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.2.0&#39;</span>
 
 
 <span class="c1"># Some parts are from the nnest library by Adam Moss (https://github.com/adammoss/nnest)</span>
@@ -425,20 +428,31 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;finding starting points and running initial </span><span class="si">%d</span><span class="s2"> MCMC steps&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
         
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ncall_here</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_chains_here</span><span class="p">):</span>
             <span class="n">u</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_starting_walkers</span><span class="p">(</span><span class="n">num_global_samples</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">)</span>
+            <span class="n">ncall_here</span> <span class="o">+=</span> <span class="n">num_global_samples</span>
             
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">==</span> <span class="s1">&#39;goodman-weare&#39;</span><span class="p">:</span>
                 <span class="n">sampler</span> <span class="o">=</span> <span class="n">emcee</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span> <span class="o">==</span> <span class="s1">&#39;slice&#39;</span><span class="p">:</span>
                 <span class="kn">import</span> <span class="nn">zeus</span>
-                <span class="n">sampler</span> <span class="o">=</span> <span class="n">zeus</span><span class="o">.</span><span class="n">sampler</span><span class="p">(</span><span class="n">nwalkers</span><span class="o">=</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">logprob</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">sampler</span> <span class="o">=</span> <span class="n">zeus</span><span class="o">.</span><span class="n">EnsembleSampler</span><span class="p">(</span><span class="n">nwalkers</span><span class="o">=</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,</span> <span class="n">logprob_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_emcee_logprob</span><span class="p">,</span> <span class="n">vectorize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">maxiter</span><span class="o">=</span><span class="mf">1e10</span><span class="p">,</span> <span class="n">maxsteps</span><span class="o">=</span><span class="mf">1e10</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampler</span><span class="p">)</span>
             <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="n">progress</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_global_samples</span> <span class="o">+</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">)</span>
-        
+            <span class="n">ncall_here</span> <span class="o">+=</span> <span class="n">num_walkers</span>
+            <span class="n">ncall_here</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="s1">&#39;ncall&#39;</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+            <span class="n">recv_ncall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncall</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ncall_here</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">recv_ncall</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="n">ncall_here</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ncall_here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">ncall_here</span>
+
         <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_improvement_loops</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;checking convergence (iteration </span><span class="si">%d</span><span class="s2">) ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
@@ -451,9 +465,9 @@
                 <span class="k">assert</span> <span class="n">accepts</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
                     <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">accepts</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;acceptance rates: </span><span class="si">%s</span><span class="s2"> (worst few)&quot;</span><span class="p">,</span> <span class="n">accepts</span><span class="p">[</span><span class="n">i</span><span class="p">[:</span><span class="mi">8</span><span class="p">]]</span> <span class="o">*</span> <span class="mf">100.</span> <span class="o">/</span> <span class="n">num_steps</span><span class="p">)</span>
-                
-                <span class="c1"># flatchain = sampler.get_chain(flat=True)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                        <span class="s2">&quot;acceptance rates: </span><span class="si">%s%%</span><span class="s2"> (worst few)&quot;</span><span class="p">,</span> 
+                        <span class="p">(</span><span class="n">accepts</span><span class="p">[</span><span class="n">i</span><span class="p">[:</span><span class="mi">8</span><span class="p">]]</span> <span class="o">*</span> <span class="mf">100.</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
                 
                 <span class="c1"># diagnose this chain</span>
                 
@@ -513,7 +527,7 @@
 
                 <span class="n">rhat</span> <span class="o">=</span> <span class="n">arviz</span><span class="o">.</span><span class="n">rhat</span><span class="p">(</span><span class="n">arviz</span><span class="o">.</span><span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">chains</span><span class="p">))</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;rhat chain diagnostic: </span><span class="si">%s</span><span class="s2"> (&lt;1.2 is good)&quot;</span><span class="p">,</span> <span class="n">rhat</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;rhat chain diagnostic: </span><span class="si">%s</span><span class="s2"> (&lt;1.2 is good)&quot;</span><span class="p">,</span> <span class="n">rhat</span><span class="p">)</span>
                 <span class="n">converged</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">rhat</span> <span class="o">&lt;</span> <span class="mf">1.2</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
@@ -528,29 +542,40 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;maximum number of likelihood calls reached&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
-                
-            
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;not converged yet at iteration </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;not converged yet at iteration </span><span class="si">%d</span><span class="s2"> after </span><span class="si">%d</span><span class="s2"> evals&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">it</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span><span class="p">))</span>
             <span class="c1">#self.logger.error(&quot;error at iteration %d&quot; % (it+1))</span>
             <span class="n">last_num_steps</span> <span class="o">=</span> <span class="n">num_steps</span>
             <span class="n">num_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_num_steps</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">next_ncalls</span> <span class="o">=</span> <span class="n">ncall_here</span> <span class="o">*</span> <span class="mi">10</span>
+
+            <span class="k">if</span> <span class="n">next_ncalls</span> <span class="o">&gt;</span> <span class="n">max_ncalls</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;would need more likelihood calls (</span><span class="si">%d</span><span class="s2">) than maximum (</span><span class="si">%d</span><span class="s2">) for next step&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">next_ncalls</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">))</span>
+                <span class="k">break</span>
             
-            <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">last_num_steps</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_walkers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;expected memory usage: </span><span class="si">%.2f</span><span class="s2"> GiB&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_chains</span> <span class="o">*</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&gt;=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;would need too much memory for next step&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+            
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Running </span><span class="si">%d</span><span class="s2"> MCMC steps ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_steps</span><span class="p">))</span>
+            <span class="n">ncall_here</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">:</span>
-                <span class="n">chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="c1">#chain = sampler.get_chain(flat=True)</span>
+                <span class="n">last_samples</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
                 <span class="c1"># get a scale small compared to the width of the current posterior</span>
-                <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-5</span><span class="p">,</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">1e-30</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">last_samples</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_walkers</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="n">a_min</span><span class="o">=</span><span class="mf">1e-30</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">)</span>
                 <span class="k">assert</span> <span class="n">std</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">,),</span> <span class="n">std</span><span class="o">.</span><span class="n">shape</span>
                 
-                <span class="c1"># sample num_walkers points from chain, proportional to likelihood</span>
-                <span class="n">L</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_log_prob</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">L</span> <span class="o">-</span> <span class="n">L</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-                <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span> <span class="o">/</span> <span class="n">p</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="c1"># sample a point from last chain point</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">last_samples</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting points chosen: </span><span class="si">%s</span><span class="s2">, L=</span><span class="si">%.1f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">L</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
                 <span class="c1"># select points</span>
-                <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">chain</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">1e-10</span><span class="p">)</span>
+                <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">last_samples</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="mf">1e-10</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">1e-10</span><span class="p">)</span>
                 <span class="c1"># add a bit of noise</span>
                 <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
                 <span class="n">u</span> <span class="o">=</span> <span class="n">u</span> <span class="o">+</span> <span class="n">noise</span>
@@ -562,11 +587,26 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting at </span><span class="si">%s</span><span class="s2"> +- </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">u</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
                 <span class="n">sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
                 <span class="c1">#self.logger.info(&quot;not converged yet at iteration %d&quot; % (it+1))</span>
+                
                 <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">last_num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">)</span>
+                <span class="n">ncall_here</span> <span class="o">+=</span> <span class="n">num_walkers</span>
+                <span class="n">ncall_here</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="s1">&#39;ncall&#39;</span><span class="p">,</span> <span class="n">last_num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">ncall_here</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ncall_here</span>
                 <span class="n">last_samples</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
                 <span class="k">assert</span> <span class="n">last_samples</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">),</span> <span class="p">(</span><span class="n">last_samples</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">num_walkers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span><span class="p">))</span>
                 <span class="n">sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
                 <span class="n">sampler</span><span class="o">.</span><span class="n">run_mcmc</span><span class="p">(</span><span class="n">last_samples</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="n">progress</span><span class="p">)</span>
+                <span class="n">ncall_here</span> <span class="o">+=</span> <span class="n">num_walkers</span>
+                <span class="n">ncall_here</span> <span class="o">+=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="s1">&#39;ncall&#39;</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">ncall_here</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">ncall_here</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="s1">&#39;ncall&#39;</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
+                <span class="n">recv_ncall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">ncall_here</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">ncall_here</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">recv_ncall</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Used </span><span class="si">%d</span><span class="s2"> calls in last MCMC run&quot;</span><span class="p">,</span> <span class="n">ncall_here</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">+=</span> <span class="n">ncall_here</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">eqsamples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplers</span><span class="p">])</span>
@@ -587,7 +627,8 @@
                 <span class="n">errup</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">eqsamples</span><span class="p">,</span> <span class="mf">84.1345</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="p">),</span>
             <span class="n">samples</span><span class="o">=</span><span class="n">eqsamples</span><span class="p">,</span>
-            <span class="n">ncall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span><span class="p">,</span>
+            <span class="n">ncall</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ncall</span><span class="p">),</span>
+            <span class="n">converged</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">converged</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span></div>
         
@@ -625,6 +666,7 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Johannes Buchner
 
     </p>
@@ -639,7 +681,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

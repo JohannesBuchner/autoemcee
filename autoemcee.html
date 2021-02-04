@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>autoemcee module &mdash; autoemcee 0.1.1 documentation</title>
+  <title>autoemcee module &mdash; autoemcee 0.2.0 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -21,7 +24,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,12 +39,9 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="autosampler module" href="autosampler.html" />
     <link rel="prev" title="API" href="modules.html" /> 
 </head>
 
@@ -54,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> autoemcee
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> autoemcee
           
 
           
@@ -67,7 +69,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.2.0
               </div>
             
           
@@ -84,6 +86,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -101,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="issues.html">Frequently Asked Questions</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">autoemcee module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autosampler.html">autosampler module</a></li>
 </ul>
 </li>
 </ul>
@@ -108,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="modules.html">API</a> &raquo;</li>
         
@@ -194,9 +199,9 @@
 <div class="section" id="module-autoemcee">
 <span id="autoemcee-module"></span><h1>autoemcee module<a class="headerlink" href="#module-autoemcee" title="Permalink to this headline">¶</a></h1>
 <p>Calculates the Bayesian evidence and posterior samples of arbitrary monomodal models.</p>
-<dl class="class">
+<dl class="py class">
 <dt id="autoemcee.ReactiveAffineInvariantSampler">
-<em class="property">class </em><code class="sig-prename descclassname">autoemcee.</code><code class="sig-name descname">ReactiveAffineInvariantSampler</code><span class="sig-paren">(</span><em class="sig-param">param_names</em>, <em class="sig-param">loglike</em>, <em class="sig-param">transform=None</em>, <em class="sig-param">num_test_samples=2</em>, <em class="sig-param">vectorized=False</em>, <em class="sig-param">sampler='goodman-weare'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">autoemcee.</code><code class="sig-name descname">ReactiveAffineInvariantSampler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param_names</span></em>, <em class="sig-param"><span class="n">loglike</span></em>, <em class="sig-param"><span class="n">transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">num_test_samples</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">vectorized</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">sampler</span><span class="o">=</span><span class="default_value">'goodman-weare'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Emcee sampler with reactive exploration strategy.</p>
 <p>Initialise sampler.</p>
@@ -216,14 +221,14 @@ random points for errors first. Useful to catch bugs.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="autoemcee.ReactiveAffineInvariantSampler.find_starting_walkers">
-<code class="sig-name descname">find_starting_walkers</code><span class="sig-paren">(</span><em class="sig-param">num_global_samples</em>, <em class="sig-param">num_walkers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.find_starting_walkers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.find_starting_walkers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">find_starting_walkers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_global_samples</span></em>, <em class="sig-param"><span class="n">num_walkers</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.find_starting_walkers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.find_starting_walkers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autoemcee.ReactiveAffineInvariantSampler.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param">num_global_samples=10000</em>, <em class="sig-param">num_chains=4</em>, <em class="sig-param">num_walkers=None</em>, <em class="sig-param">max_ncalls=1000000</em>, <em class="sig-param">max_improvement_loops=4</em>, <em class="sig-param">num_initial_steps=100</em>, <em class="sig-param">min_autocorr_times=0</em>, <em class="sig-param">progress=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_global_samples</span><span class="o">=</span><span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">num_chains</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">num_walkers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_ncalls</span><span class="o">=</span><span class="default_value">1000000</span></em>, <em class="sig-param"><span class="n">max_improvement_loops</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">num_initial_steps</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">min_autocorr_times</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sample until MCMC chains have converged.</p>
 <p>The steps are:</p>
 <ol class="arabic simple">
@@ -255,15 +260,15 @@ times the autocorrelation length.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autoemcee.ReactiveAffineInvariantSampler.print_results">
 <code class="sig-name descname">print_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.print_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.print_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Give summary of marginal likelihood and parameters.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="autoemcee.ReactiveAffineInvariantSampler.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.plot" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -278,6 +283,8 @@ times the autocorrelation length.</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="autosampler.html" class="btn btn-neutral float-right" title="autosampler module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
       
         <a href="modules.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
@@ -288,6 +295,7 @@ times the autocorrelation length.</p></li>
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Johannes Buchner
 
     </p>
@@ -302,7 +310,6 @@ times the autocorrelation length.</p></li>
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

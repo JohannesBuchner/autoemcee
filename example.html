@@ -1,15 +1,18 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorial &mdash; autoemcee 0.1.1 documentation</title>
+  <title>Tutorial &mdash; autoemcee 0.2.0 documentation</title>
   
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
 
   
   
@@ -21,7 +24,9 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -34,10 +39,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contributing" href="contributing.html" />
@@ -55,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> autoemcee
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> autoemcee
           
 
           
@@ -68,7 +69,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.2.0
               </div>
             
           
@@ -85,6 +86,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -111,6 +113,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -149,7 +152,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Tutorial</li>
     
@@ -173,21 +176,35 @@
 /* CSS for nbsphinx extension */
 
 /* remove conflicting styling from Sphinx themes */
-div.nbinput.container,
-div.nbinput.container div.prompt,
-div.nbinput.container div.input_area,
-div.nbinput.container div[class*=highlight],
-div.nbinput.container div[class*=highlight] pre,
-div.nboutput.container,
-div.nboutput.container div.prompt,
-div.nboutput.container div.output_area,
-div.nboutput.container div[class*=highlight],
-div.nboutput.container div[class*=highlight] pre {
-    background: none;
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
     border: none;
-    padding: 0 0;
+    padding: 0;
     margin: 0;
     box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
 }
 
 /* avoid gaps between output lines */
@@ -234,20 +251,33 @@ div.nboutput.container div.prompt pre {
 /* all prompts */
 div.nbinput.container div.prompt,
 div.nboutput.container div.prompt {
-    min-width: 5ex;
-    padding-top: 0.3rem;
-    padding-right: 0.3rem;
-    text-align: right;
-    flex: 0;
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
     div.nbinput.container div.prompt,
     div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
     div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
@@ -275,7 +305,7 @@ div.nboutput.container div.output_area {
 div.nbinput.container div.input_area {
     border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f5f5f5;
+    /*background: #f5f5f5;*/
 }
 
 /* override MathJax center alignment in output cells */
@@ -340,7 +370,8 @@ div.nboutput.container div.output_area div[class*=highlight].math,
 div.nboutput.container div.output_area.rendered_html,
 div.nboutput.container div.output_area > div.output_javascript,
 div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 0.3rem;
+    padding: 5px;
+    margin: 0;
 }
 
 /* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
@@ -416,7 +447,7 @@ div.rendered_html tbody tr:hover {
 <h2>Quickstart<a class="headerlink" href="#Quickstart" title="Permalink to this headline">¶</a></h2>
 <p>Here is how to fit a simple likelihood function:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -433,6 +464,8 @@ div.rendered_html tbody tr:hover {
 <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveAffineInvariantSampler</span><span class="p">(</span><span class="n">paramnames</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
 
 <span class="n">results</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -449,10 +482,10 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 100/100 [00:00&lt;00:00, 696.37it/s]
-100%|██████████| 100/100 [00:00&lt;00:00, 795.98it/s]
-100%|██████████| 100/100 [00:00&lt;00:00, 838.16it/s]
-100%|██████████| 100/100 [00:00&lt;00:00, 836.45it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 900.92it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 914.92it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 919.43it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 927.28it/s]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -460,12 +493,16 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+[autoemcee] rhat chain diagnostic: [1.07578334 1.08435227] (&lt;1.2 is good)
 [autoemcee] converged!!!
+
+    Hinz                0.499 +- 0.058
+    Kunz                0.496 +- 0.062
 </pre></div></div>
 </div>
-<p>This gave us error estimates and even logZ!</p>
+<p>The chains converged and we got parameter and uncertainty estimates.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -485,7 +522,7 @@ Loglikelihood was called 80400 times.
 <div class="section" id="Visualisation">
 <h2>Visualisation<a class="headerlink" href="#Visualisation" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -514,7 +551,7 @@ WARNING:root:Too few points to create valid contours
 <h2>Advanced usage<a class="headerlink" href="#Advanced-usage" title="Permalink to this headline">¶</a></h2>
 <p>Lets try a function that cannot be described by a simple gaussian.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -553,19 +590,38 @@ WARNING:root:Too few points to create valid contours
 <div class="highlight"><pre>
 INFO:autoemcee:finding starting points and running initial 100 MCMC steps
 DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 467.38it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 705.27it/s]
 DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 514.52it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 722.22it/s]
 DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 640.09it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 698.93it/s]
 DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 634.67it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 711.28it/s]
 DEBUG:autoemcee:checking convergence (iteration 1) ...
-DEBUG:autoemcee:acceptance rates: [ 0.  2.  6.  7.  8.  8. 10. 10.] (worst few)
-DEBUG:autoemcee:acceptance rates: [6. 6. 7. 7. 7. 8. 9. 9.] (worst few)
-DEBUG:autoemcee:acceptance rates: [1. 4. 4. 5. 6. 6. 7. 8.] (worst few)
-DEBUG:autoemcee:acceptance rates: [ 5.  5.  6.  7.  8.  9.  9. 10.] (worst few)
-DEBUG:autoemcee:rhat chain diagnostic: [1.01293459 1.00974481] (&lt;1.2 is good)
+DEBUG:autoemcee:acceptance rates: [ 3  5  7  9  9 10 11 11]% (worst few)
+DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
+DEBUG:autoemcee:acceptance rates: [ 4  4  6  8  9  9  9 10]% (worst few)
+DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
+DEBUG:autoemcee:acceptance rates: [ 3  6  8  9  9 10 11 11]% (worst few)
+DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
+DEBUG:autoemcee:acceptance rates: [ 4  7  7  8  9  9 10 10]% (worst few)
+DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] rhat chain diagnostic: [1.00743679 1.00573425] (&lt;1.2 is good)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+INFO:autoemcee:rhat chain diagnostic: [1.00743679 1.00573425] (&lt;1.2 is good)
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -586,11 +642,11 @@ INFO:autoemcee:converged!!!
 </div>
 <p>This already took quite a bit more effort.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loglikelihood was called </span><span class="si">%d</span><span class="s2"> times.&quot;</span> <span class="o">%</span> <span class="n">sampler</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;ncall&#39;</span><span class="p">])</span>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loglikelihood was called </span><span class="si">%d</span><span class="s2"> times.&quot;</span> <span class="o">%</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;ncall&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
@@ -604,15 +660,15 @@ Loglikelihood was called 80400 times.
 </div>
 <p>Lets see how well it did:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">getdist</span> <span class="kn">import</span> <span class="n">MCSamples</span><span class="p">,</span> <span class="n">plots</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="n">samples_g</span> <span class="o">=</span> <span class="n">MCSamples</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">sampler</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">],</span>
-                       <span class="n">names</span><span class="o">=</span><span class="n">sampler</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">],</span>
+<span class="n">samples_g</span> <span class="o">=</span> <span class="n">MCSamples</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">],</span>
+                       <span class="n">names</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">],</span>
                        <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">,</span>
                        <span class="n">settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">smooth_scale_2D</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
 
@@ -630,7 +686,7 @@ Removed no burn in
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -641,30 +697,38 @@ Removed no burn in
 
 <span class="n">g</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">get_single_plotter</span><span class="p">()</span>
 <span class="n">g</span><span class="o">.</span><span class="n">plot_2d</span><span class="p">(</span><span class="n">mcsamples</span><span class="p">,</span> <span class="n">paramnames</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Reds&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:root:fine_bins_2D not large enough for optimal density
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/example_13_0.png" src="_images/example_13_0.png" />
+<img alt="_images/example_13_1.png" src="_images/example_13_1.png" />
 </div>
 </div>
-<p>As you can see, the importance sampler was not able to perfectly follow the rosenbrock curvature. But it is a good start to roughly understand the uncertainties!</p>
+<p>As you can see, the MCMC sampler (black) is approximating the rosenbrock curvature (red).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">getdist</span> <span class="kn">import</span> <span class="n">MCSamples</span><span class="p">,</span> <span class="n">plots</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="n">samples_g</span> <span class="o">=</span> <span class="n">MCSamples</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">sampler</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">],</span>
-                       <span class="n">names</span><span class="o">=</span><span class="n">sampler</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">],</span>
+<span class="n">samples_g</span> <span class="o">=</span> <span class="n">MCSamples</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;samples&#39;</span><span class="p">],</span>
+                       <span class="n">names</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">],</span>
                        <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Gaussian&#39;</span><span class="p">)</span>
 
 <span class="n">mcsamples</span> <span class="o">=</span> <span class="p">[</span><span class="n">samples_g</span><span class="p">]</span>
@@ -682,8 +746,8 @@ Removed no burn in
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-WARNING:root:auto bandwidth for Hinz very small or failed (h=0.0003581145640592136,N_eff=40000.0). Using fallback (h=0.022341691766568705)
-WARNING:root:auto bandwidth for Kunz very small or failed (h=0.00033488948303514286,N_eff=40000.0). Using fallback (h=0.012782960411518487)
+WARNING:root:auto bandwidth for Hinz very small or failed (h=0.000361043402986483,N_eff=40000.0). Using fallback (h=0.022557839707916118)
+WARNING:root:auto bandwidth for Kunz very small or failed (h=0.00035974878923237315,N_eff=40000.0). Using fallback (h=0.01343557995754462)
 WARNING:root:fine_bins_2D not large enough for optimal density
 </pre></div></div>
 </div>
@@ -725,6 +789,7 @@ Removed no burn in
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Johannes Buchner
 
     </p>
@@ -739,7 +804,6 @@ Removed no burn in
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

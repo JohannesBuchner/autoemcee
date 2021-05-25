@@ -217,7 +217,7 @@ class ReactiveAffineInvariantSampler(object):
         2. Set *num_steps* to *num_initial_steps*
         3. Run *num_chains* MCMC ensembles for *num_steps* steps
         4. For each walker chain, compute auto-correlation length (Convergence requires *num_steps*/autocorrelation length > *min_autocorr_times*)
-        5. For each parameter, compute geweke convergence diagnostic (Convergence requires \|z\| < 2)
+        5. For each parameter, compute geweke convergence diagnostic (Convergence requires |z| < 2)
         6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat<1.2)
         7. If converged, stop and return results. 
         8. Increase *num_steps* by 10, and repeat from (3) up to *max_improvement_loops* times.
@@ -373,7 +373,7 @@ class ReactiveAffineInvariantSampler(object):
             
             if self.ncall > max_ncalls:
                 if self.log:
-                    self.logger.warn("maximum number of likelihood calls reached")
+                    self.logger.warning("maximum number of likelihood calls reached")
                 break
 
             if self.log:
@@ -385,13 +385,13 @@ class ReactiveAffineInvariantSampler(object):
 
             if next_ncalls > max_ncalls:
                 if self.log:
-                    self.logger.warn("would need more likelihood calls (%d) than maximum (%d) for next step" % (next_ncalls, max_ncalls))
+                    self.logger.warning("would need more likelihood calls (%d) than maximum (%d) for next step" % (next_ncalls, max_ncalls))
                 break
             
             self.logger.debug("expected memory usage: %.2f GiB" % (num_chains * num_steps * num_walkers * self.x_dim * 4 / 1024**3))
             if num_chains * num_steps * num_walkers * self.x_dim * 4 >= 5 * 1024**3:
                 if self.log:
-                    self.logger.warn("would need too much memory for next step")
+                    self.logger.warning("would need too much memory for next step")
                 break
             
             if self.log:

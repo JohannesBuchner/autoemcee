@@ -1,4 +1,5 @@
 oldest-supported-numpy
 emcee
+corner
 zeus-mcmc
 arviz

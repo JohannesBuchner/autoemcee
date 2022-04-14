@@ -13,7 +13,7 @@ with gradually increasing number of samples until they converge.
 Convergence is tested for each ensemble and for each parameter with the Geweke diagnostic.
 Additionally, across ensembles, the Gelman-Rubin r-hat is used.
 
-Can be run with MPI without modifying the code.
+Supports MPI, without requiring any modifications to your code (just run your script with mpiexec).
 
 .. image:: https://img.shields.io/pypi/v/autoemcee.svg
         :target: https://pypi.python.org/pypi/autoemcee
@@ -25,7 +25,6 @@ Can be run with MPI without modifying the code.
         :target: https://johannesbuchner.github.io/autoemcee/
         :alt: Documentation Status
 
-
 This package is built on top of emcee, zeus, anviz and mpi4py.
 
 You can help by testing autoemcee and reporting issues. Code contributions are welcome.
@@ -36,8 +35,8 @@ Features
 
 * Pythonic. pip installable.
 * Easy to program for: Sanity checks with meaningful errors
-* Supports both emcee and zeus
-* MPI support
+* both emcee and zeus are supported
+* MPI support for parallel high-performance computing
 
 Usage
 ^^^^^

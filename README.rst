@@ -21,9 +21,6 @@ Supports MPI, without requiring any modifications to your code (just run your sc
 .. image:: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg
         :target: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml
 
-.. image:: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg
-        :target: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml
-
 .. image:: https://coveralls.io/repos/github/JohannesBuchner/autoemcee/badge.svg?branch=master
         :target: https://coveralls.io/github/JohannesBuchner/autoemcee?branch=master
 

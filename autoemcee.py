@@ -17,7 +17,7 @@ import arviz
 __all__ = ['ReactiveAffineInvariantSampler']
 __author__ = """Johannes Buchner"""
 __email__ = 'johannes.buchner.acad@gmx.com'
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 
 # Some parts are from the nnest library by Adam Moss (https://github.com/adammoss/nnest)

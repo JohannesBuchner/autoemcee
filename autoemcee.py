@@ -208,6 +208,8 @@ class ReactiveAffineInvariantSampler(object):
             max_improvement_loops=4,
             num_initial_steps=100,
             min_autocorr_times=0,
+            rhat_max=1.01,
+            geweke_max=2.,
             progress=True):
         """Sample until MCMC chains have converged.
 
@@ -217,8 +219,8 @@ class ReactiveAffineInvariantSampler(object):
         2. Set *num_steps* to *num_initial_steps*
         3. Run *num_chains* MCMC ensembles for *num_steps* steps
         4. For each walker chain, compute auto-correlation length (Convergence requires *num_steps*/autocorrelation length > *min_autocorr_times*)
-        5. For each parameter, compute geweke convergence diagnostic (Convergence requires |z| < 2)
-        6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat<1.2)
+        5. For each parameter, compute geweke convergence diagnostic (Convergence requires |z| < geweke_max)
+        6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat<rhat_max)
         7. If converged, stop and return results. 
         8. Increase *num_steps* by 10, and repeat from (3) up to *max_improvement_loops* times.
 
@@ -243,6 +245,10 @@ class ReactiveAffineInvariantSampler(object):
             if positive, additionally require for convergence that the 
             number of samples is larger than the *min_autocorr_times*
             times the autocorrelation length.
+        geweke_max: float
+            Maximum absolute z-score of the geweke test allowed for convergence.
+        rhat_max: float
+            Maximum r-hat allowed for convergence.
         progress: bool
             if True, show progress bars
 
@@ -335,7 +341,7 @@ class ReactiveAffineInvariantSampler(object):
                     a = sampler.get_chain(flat=True)[:num_steps // 4, i]
                     b = sampler.get_chain(flat=True)[-num_steps // 4:, i]
                     geweke_z = (a.mean() - b.mean()) / (np.var(a) + np.var(b))**0.5
-                    if geweke_z > 2.:
+                    if geweke_z > geweke_max:
                         self.logger.debug("geweke drift (z=%.1f) detected for parameter '%s'" % (geweke_z, self.paramnames[i]))
                         converged = False
                     
@@ -361,7 +367,7 @@ class ReactiveAffineInvariantSampler(object):
                 rhat = arviz.rhat(arviz.convert_to_dataset(chains)).x.data
                 if self.log:
                     self.logger.info("rhat chain diagnostic: %s (<1.2 is good)", rhat)
-                converged = np.all(rhat < 1.2)
+                converged = np.all(rhat < rhat_max)
 
                 if self.use_mpi:
                     converged = self.comm.bcast(converged, root=0)

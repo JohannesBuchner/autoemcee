@@ -46,6 +46,7 @@ def test_run_vectorized():
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, 
         sampler='slice', vectorized=True)
     r = sampler.run(max_improvement_loops=2)
+    sampler.plot()
     assert 0.95 < sampler.ncall / loglike.ncalls < 1.05, (sampler.ncall, loglike.ncalls)
 
 def test_rosen():
@@ -66,6 +67,7 @@ def test_rosen():
     
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, sampler='slice')
     sampler.run(max_improvement_loops=1)
+    sampler.print_results()
     assert 0.95 < sampler.ncall / loglike.ncalls < 1.05, (sampler.ncall, loglike.ncalls)
     
 

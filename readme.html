@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>autoemcee &mdash; autoemcee 0.2.0 documentation</title>
+  <title>autoemcee &mdash; autoemcee 0.3.1 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.2.0
+                0.3.1
               </div>
             
           
@@ -208,9 +208,10 @@
 with gradually increasing number of samples until they converge.</p>
 <p>Convergence is tested for each ensemble and for each parameter with the Geweke diagnostic.
 Additionally, across ensembles, the Gelman-Rubin r-hat is used.</p>
-<p>Can be run with MPI without modifying the code.</p>
+<p>Supports MPI, without requiring any modifications to your code (just run your script with mpiexec).</p>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/autoemcee"><img alt="https://img.shields.io/pypi/v/autoemcee.svg" src="https://img.shields.io/pypi/v/autoemcee.svg" /></a>
-<a class="reference external image-reference" href="https://travis-ci.com/github/JohannesBuchner/autoemcee"><img alt="https://api.travis-ci.com/JohannesBuchner/autoemcee.svg?branch=master&amp;status=started" src="https://api.travis-ci.com/JohannesBuchner/autoemcee.svg?branch=master&amp;status=started" /></a>
+<a class="reference external image-reference" href="https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml"><img alt="https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg" src="https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg" /></a>
+<a class="reference external image-reference" href="https://coveralls.io/github/JohannesBuchner/autoemcee?branch=master"><img alt="https://coveralls.io/repos/github/JohannesBuchner/autoemcee/badge.svg?branch=master" src="https://coveralls.io/repos/github/JohannesBuchner/autoemcee/badge.svg?branch=master" /></a>
 <a class="reference external image-reference" href="https://johannesbuchner.github.io/autoemcee/"><img alt="Documentation Status" src="https://img.shields.io/badge/docs-published-ok.svg" /></a>
 <p>This package is built on top of emcee, zeus, anviz and mpi4py.</p>
 <p>You can help by testing autoemcee and reporting issues. Code contributions are welcome.
@@ -221,8 +222,8 @@ See the <a class="reference external" href="https://johannesbuchner.github.io/au
 <ul class="simple">
 <li><p>Pythonic. pip installable.</p></li>
 <li><p>Easy to program for: Sanity checks with meaningful errors</p></li>
-<li><p>Supports both emcee and zeus</p></li>
-<li><p>MPI support</p></li>
+<li><p>both emcee and zeus are supported</p></li>
+<li><p>MPI support for parallel high-performance computing</p></li>
 </ul>
 <div class="section" id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>

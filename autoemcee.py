@@ -366,7 +366,7 @@ class ReactiveAffineInvariantSampler(object):
 
                 rhat = arviz.rhat(arviz.convert_to_dataset(chains)).x.data
                 if self.log:
-                    self.logger.info("rhat chain diagnostic: %s (<1.2 is good)", rhat)
+                    self.logger.info("rhat chain diagnostic: %s (<%.3f is good)", rhat, rhat_max)
                 converged = np.all(rhat < rhat_max)
 
                 if self.use_mpi:

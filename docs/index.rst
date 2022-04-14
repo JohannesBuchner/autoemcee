@@ -11,7 +11,7 @@ Welcome to autoemcee's documentation!
    contributing
    history
    issues
-   modules
+   autoemcee
 
 .. include:: ../README.rst
 

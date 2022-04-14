@@ -18,8 +18,14 @@ Supports MPI, without requiring any modifications to your code (just run your sc
 .. image:: https://img.shields.io/pypi/v/autoemcee.svg
         :target: https://pypi.python.org/pypi/autoemcee
 
-.. image:: https://api.travis-ci.com/JohannesBuchner/autoemcee.svg?branch=master&status=started
-        :target: https://travis-ci.com/github/JohannesBuchner/autoemcee
+.. image:: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg
+        :target: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml
+
+.. image:: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg
+        :target: https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml
+
+.. image:: https://coveralls.io/repos/github/JohannesBuchner/autoemcee/badge.svg?branch=master
+        :target: https://coveralls.io/github/JohannesBuchner/autoemcee?branch=master
 
 .. image:: https://img.shields.io/badge/docs-published-ok.svg
         :target: https://johannesbuchner.github.io/autoemcee/

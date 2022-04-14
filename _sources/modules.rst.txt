@@ -5,5 +5,3 @@ API
    :maxdepth: 4
 
    autoemcee
-   autosampler
-   autosampler-prev

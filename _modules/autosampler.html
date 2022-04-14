@@ -176,6 +176,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
+
 <div class="viewcode-block" id="RegionLogger"><a class="viewcode-back" href="../autosampler.html#autosampler.RegionLogger">[docs]</a><span class="k">class</span> <span class="nc">RegionLogger</span><span class="p">():</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
@@ -183,14 +184,47 @@
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">transformLayer</span><span class="p">,</span> <span class="n">region_fresh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;region_</span><span class="si">%d</span><span class="s1">.txt.gz&#39;</span> <span class="o">%</span> <span class="n">info</span><span class="p">[</span><span class="s1">&#39;it&#39;</span><span class="p">]</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">region</span><span class="o">.</span><span class="n">u</span><span class="p">)</span></div>
-    
-    
+
+
+<div class="viewcode-block" id="ultranest_run"><a class="viewcode-back" href="../autosampler.html#autosampler.ultranest_run">[docs]</a><span class="k">def</span> <span class="nf">ultranest_run</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># first quick run-through:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">results_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">run_iter</span><span class="p">(</span>
+        <span class="n">frac_remain</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">max_num_improvement_loops</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+        <span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">,</span> <span class="n">viz_callback</span><span class="o">=</span><span class="n">RegionLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results_</span><span class="p">)</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;weighted_samples&#39;</span><span class="p">]</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/results-</span><span class="si">%d</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/samples-</span><span class="si">%d</span><span class="s1">.txt.gz&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">results_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">run_iter</span><span class="p">(</span><span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">,</span> <span class="n">viz_callback</span><span class="o">=</span><span class="n">RegionLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="n">offset</span><span class="p">):</span>
+        <span class="c1"># complete run-through, with potential reactive iterations</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results_</span><span class="p">)</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;weighted_samples&#39;</span><span class="p">]</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;paramnames&#39;</span><span class="p">]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/results-</span><span class="si">%d</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/samples-</span><span class="si">%d</span><span class="s1">.txt.gz&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/results.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/samples.txt.gz&#39;</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">results_</span></div>
+
+
 <div class="viewcode-block" id="run_sampler"><a class="viewcode-back" href="../autosampler.html#autosampler.run_sampler">[docs]</a><span class="k">def</span> <span class="nf">run_sampler</span><span class="p">(</span>
     <span class="n">param_names</span><span class="p">,</span>
     <span class="n">loglike</span><span class="p">,</span>
     <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">vectorized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">max_ncalls</span> <span class="o">=</span> <span class="mi">400000000</span>
+    <span class="n">max_ncalls</span><span class="o">=</span><span class="mi">400000000</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialise sampler.</span>
 
@@ -217,7 +251,6 @@
 
     <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">param_names</span><span class="p">)</span>
     
-    
     <span class="k">if</span> <span class="n">vectorized</span><span class="p">:</span>
         <span class="k">def</span> <span class="nf">flat_loglike</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
             <span class="n">L</span> <span class="o">=</span> <span class="n">loglike</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
@@ -233,7 +266,8 @@
     <span class="k">if</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;multinest&#39;</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">pymultinest.solve</span> <span class="kn">import</span> <span class="n">solve</span>
         <span class="kn">import</span> <span class="nn">pymultinest</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span><span class="n">LogLikelihood</span><span class="o">=</span><span class="n">flat_loglike</span><span class="p">,</span> <span class="n">Prior</span><span class="o">=</span><span class="n">flat_transform</span><span class="p">,</span> 
+        <span class="n">results</span> <span class="o">=</span> <span class="n">solve</span><span class="p">(</span>
+            <span class="n">LogLikelihood</span><span class="o">=</span><span class="n">flat_loglike</span><span class="p">,</span> <span class="n">Prior</span><span class="o">=</span><span class="n">flat_transform</span><span class="p">,</span> 
             <span class="n">n_dims</span><span class="o">=</span><span class="n">ndim</span><span class="p">,</span> <span class="n">outputfiles_basename</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span>
             <span class="n">n_live_points</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
             <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">importance_nested_sampling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -255,7 +289,8 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;nestle&#39;</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">nestle</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">nestle</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">flat_loglike</span><span class="p">,</span> <span class="n">flat_transform</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">nestle</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="n">flat_loglike</span><span class="p">,</span> <span class="n">flat_transform</span><span class="p">,</span> <span class="n">ndim</span><span class="p">,</span>
             <span class="n">npoints</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;multi&#39;</span><span class="p">,</span>
             <span class="n">callback</span><span class="o">=</span><span class="n">nestle</span><span class="o">.</span><span class="n">print_progress</span><span class="p">,</span> <span class="n">maxcall</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">)</span>
         <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -324,11 +359,9 @@
     <span class="k">elif</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;ultranest-safe&#39;</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">ultranest</span> <span class="kn">import</span> <span class="n">ReactiveNestedSampler</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveNestedSampler</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> 
-            <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span><span class="p">)</span>
-        <span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">,</span> <span class="n">viz_callback</span><span class="o">=</span><span class="n">RegionLogger</span><span class="p">(</span><span class="n">log_dir</span><span class="p">))</span>
+            <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span><span class="p">,</span> <span class="n">ndraw_max</span><span class="o">=</span><span class="mi">10000000</span><span class="p">)</span>
+        <span class="n">ultranest_run</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">)</span>
         <span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/stepsampler_stats_region.pdf&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
             <span class="n">sampler</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;ultranest-fast&#39;</span><span class="p">:</span>
@@ -336,7 +369,7 @@
         <span class="n">slice_steps</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="n">adaptive_nsteps</span> <span class="o">=</span> <span class="s1">&#39;move-distance&#39;</span>
         
-        <span class="n">log_dir</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;RNS-</span><span class="si">%d</span><span class="s1">d-harm</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">slice_steps</span><span class="p">)</span>
+        <span class="c1"># log_dir = log_dir + &#39;RNS-%dd-harm%d&#39; % (ndim, slice_steps)</span>
         <span class="k">if</span> <span class="n">adaptive_nsteps</span><span class="p">:</span>
             <span class="n">log_dir</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;-adapt</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">adaptive_nsteps</span><span class="p">)</span>
 
@@ -346,13 +379,34 @@
         <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span> <span class="o">=</span> <span class="n">ultranest</span><span class="o">.</span><span class="n">stepsampler</span><span class="o">.</span><span class="n">RegionBallSliceSampler</span><span class="p">(</span>
             <span class="n">nsteps</span><span class="o">=</span><span class="n">slice_steps</span><span class="p">,</span> <span class="n">adaptive_nsteps</span><span class="o">=</span><span class="n">adaptive_nsteps</span><span class="p">,</span> <span class="n">region_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
-        <span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">)</span>
+        <span class="n">ultranest_run</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">)</span>
         <span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/stepsampler_stats_region.pdf&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
             <span class="n">sampler</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;ultranest-faster&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">ultranest</span> <span class="kn">import</span> <span class="n">ReactiveNestedSampler</span>
+        <span class="kn">from</span> <span class="nn">ultranest.mlfriends</span> <span class="kn">import</span> <span class="n">RobustEllipsoidRegion</span>
+        <span class="kn">from</span> <span class="nn">ultranest.popstepsampler</span> <span class="kn">import</span> <span class="n">PopulationSliceSampler</span><span class="p">,</span> <span class="n">generate_cube_oriented_direction</span>
+        <span class="n">nsteps</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="n">popsize</span> <span class="o">=</span> <span class="mi">10</span> <span class="k">if</span> <span class="n">vectorized</span> <span class="k">else</span> <span class="mi">1</span>
+        
+        <span class="c1"># log_dir = log_dir + &#39;RNS-%dd-unit%d&#39; % (ndim, nsteps)</span>
+
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveNestedSampler</span><span class="p">(</span>
+            <span class="n">param_names</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span><span class="p">)</span>
+        
+        <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span> <span class="o">=</span> <span class="n">PopulationSliceSampler</span><span class="p">(</span>
+            <span class="n">popsize</span><span class="o">=</span><span class="n">popsize</span><span class="p">,</span> <span class="n">nsteps</span><span class="o">=</span><span class="n">nsteps</span><span class="p">,</span>
+            <span class="n">generate_direction</span><span class="o">=</span><span class="n">generate_cube_oriented_direction</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        
+        <span class="n">ultranest_run</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">,</span> <span class="n">region_class</span><span class="o">=</span><span class="n">RobustEllipsoidRegion</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
+            <span class="n">sampler</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;ultranest-HD&#39;</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">ultranest</span> <span class="kn">import</span> <span class="n">ReactiveNestedSampler</span>
         <span class="n">slice_steps</span> <span class="o">=</span> <span class="mi">100</span>
         <span class="n">adaptive_nsteps</span> <span class="o">=</span> <span class="s1">&#39;move-distance&#39;</span>
@@ -361,13 +415,14 @@
         <span class="k">if</span> <span class="n">adaptive_nsteps</span><span class="p">:</span>
             <span class="n">log_dir</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;-adapt</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">adaptive_nsteps</span><span class="p">)</span>
 
-        <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveNestedSampler</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveNestedSampler</span><span class="p">(</span>
+            <span class="n">param_names</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
             <span class="n">log_dir</span><span class="o">=</span><span class="n">log_dir</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span><span class="p">)</span>
         <span class="kn">import</span> <span class="nn">ultranest.stepsampler</span>
         <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span> <span class="o">=</span> <span class="n">ultranest</span><span class="o">.</span><span class="n">stepsampler</span><span class="o">.</span><span class="n">AHARMSampler</span><span class="p">(</span>
             <span class="n">nsteps</span><span class="o">=</span><span class="n">slice_steps</span><span class="p">,</span> <span class="n">adaptive_nsteps</span><span class="o">=</span><span class="n">adaptive_nsteps</span><span class="p">,</span> <span class="n">region_filter</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
-        <span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">)</span>
+        <span class="n">ultranest_run</span><span class="p">(</span><span class="n">sampler</span><span class="p">,</span> <span class="n">log_dir</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">)</span>
         <span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">sampler</span><span class="o">.</span><span class="n">stepsampler</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/stepsampler_stats_region.pdf&#39;</span><span class="p">)</span>
@@ -375,7 +430,8 @@
             <span class="n">sampler</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">samplername</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;goodman-weare&#39;</span><span class="p">,</span> <span class="s1">&#39;slice&#39;</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">autoemcee</span> <span class="kn">import</span> <span class="n">ReactiveAffineInvariantSampler</span>
-        <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveAffineInvariantSampler</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> 
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveAffineInvariantSampler</span><span class="p">(</span>
+            <span class="n">param_names</span><span class="p">,</span> <span class="n">loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> 
             <span class="n">sampler</span><span class="o">=</span><span class="n">samplername</span><span class="p">,</span> <span class="n">vectorized</span><span class="o">=</span><span class="n">vectorized</span><span class="p">)</span>
         <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">))</span>
         <span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
@@ -389,12 +445,23 @@
     <span class="k">elif</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;vbis&#39;</span> <span class="ow">or</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;vbis-wide&#39;</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">snowline</span> <span class="kn">import</span> <span class="n">ReactiveImportanceSampler</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="n">ReactiveImportanceSampler</span><span class="p">(</span><span class="n">param_names</span><span class="p">,</span> <span class="n">flat_loglike</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">flat_transform</span><span class="p">)</span>
-        <span class="n">sampler</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">,</span> <span class="n">num_gauss_samples</span><span class="o">=</span><span class="n">ndim</span> <span class="o">*</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="n">sampler</span><span class="o">.</span><span class="n">laplace_approximate</span><span class="p">(</span>
+            <span class="n">num_global_samples</span><span class="o">=</span><span class="n">ndim</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="k">if</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;vbis-wide&#39;</span> <span class="k">else</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">results_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sampler</span><span class="o">.</span><span class="n">run_iter</span><span class="p">(</span>
+            <span class="n">num_gauss_samples</span><span class="o">=</span><span class="n">ndim</span> <span class="o">*</span> <span class="mi">200</span><span class="p">,</span>
+            <span class="n">max_ncalls</span><span class="o">=</span><span class="n">max_ncalls</span><span class="p">,</span>
+            <span class="n">min_ess</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+            <span class="n">max_improvement_loops</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
             <span class="n">heavytail_laplaceapprox</span><span class="o">=</span><span class="p">(</span><span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;vbis-wide&#39;</span><span class="p">),</span>
-            <span class="n">max_improvement_loops</span><span class="o">=</span><span class="mi">10</span> <span class="k">if</span> <span class="n">samplername</span> <span class="o">==</span> <span class="s1">&#39;vbis-wide&#39;</span> <span class="k">else</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="p">)):</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">results_</span><span class="p">)</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/results-</span><span class="si">%d</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">fout</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/samples-</span><span class="si">%d</span><span class="s1">.txt.gz&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>
+
         <span class="n">sampler</span><span class="o">.</span><span class="n">print_results</span><span class="p">()</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">results</span>
-        <span class="n">samples</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;samples&#39;</span><span class="p">)</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/results.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/samples.txt.gz&#39;</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">ndim</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
@@ -411,6 +478,7 @@
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     
     <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Hinz&#39;</span><span class="p">,</span> <span class="s1">&#39;Kunz&#39;</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">loglike</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
         <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(((</span><span class="n">z</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">0.01</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mf">0.01</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">return</span> <span class="n">a</span>

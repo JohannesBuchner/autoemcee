@@ -375,6 +375,8 @@
             <span class="n">max_improvement_loops</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">num_initial_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
             <span class="n">min_autocorr_times</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">rhat_max</span><span class="o">=</span><span class="mf">1.01</span><span class="p">,</span>
+            <span class="n">geweke_max</span><span class="o">=</span><span class="mf">2.</span><span class="p">,</span>
             <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Sample until MCMC chains have converged.</span>
 
@@ -384,8 +386,8 @@
 <span class="sd">        2. Set *num_steps* to *num_initial_steps*</span>
 <span class="sd">        3. Run *num_chains* MCMC ensembles for *num_steps* steps</span>
 <span class="sd">        4. For each walker chain, compute auto-correlation length (Convergence requires *num_steps*/autocorrelation length &gt; *min_autocorr_times*)</span>
-<span class="sd">        5. For each parameter, compute geweke convergence diagnostic (Convergence requires \|z\| &lt; 2)</span>
-<span class="sd">        6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat&lt;1.2)</span>
+<span class="sd">        5. For each parameter, compute geweke convergence diagnostic (Convergence requires |z| &lt; geweke_max)</span>
+<span class="sd">        6. For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat&lt;rhat_max)</span>
 <span class="sd">        7. If converged, stop and return results. </span>
 <span class="sd">        8. Increase *num_steps* by 10, and repeat from (3) up to *max_improvement_loops* times.</span>
 
@@ -410,6 +412,10 @@
 <span class="sd">            if positive, additionally require for convergence that the </span>
 <span class="sd">            number of samples is larger than the *min_autocorr_times*</span>
 <span class="sd">            times the autocorrelation length.</span>
+<span class="sd">        geweke_max: float</span>
+<span class="sd">            Maximum absolute z-score of the geweke test allowed for convergence.</span>
+<span class="sd">        rhat_max: float</span>
+<span class="sd">            Maximum r-hat allowed for convergence.</span>
 <span class="sd">        progress: bool</span>
 <span class="sd">            if True, show progress bars</span>
 
@@ -502,7 +508,7 @@
                     <span class="n">a</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
                     <span class="n">b</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="o">-</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span>
                     <span class="n">geweke_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>
-                    <span class="k">if</span> <span class="n">geweke_z</span> <span class="o">&gt;</span> <span class="mf">2.</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">geweke_z</span> <span class="o">&gt;</span> <span class="n">geweke_max</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;geweke drift (z=</span><span class="si">%.1f</span><span class="s2">) detected for parameter &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geweke_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">paramnames</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                         <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
                     
@@ -528,7 +534,7 @@
                 <span class="n">rhat</span> <span class="o">=</span> <span class="n">arviz</span><span class="o">.</span><span class="n">rhat</span><span class="p">(</span><span class="n">arviz</span><span class="o">.</span><span class="n">convert_to_dataset</span><span class="p">(</span><span class="n">chains</span><span class="p">))</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;rhat chain diagnostic: </span><span class="si">%s</span><span class="s2"> (&lt;1.2 is good)&quot;</span><span class="p">,</span> <span class="n">rhat</span><span class="p">)</span>
-                <span class="n">converged</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">rhat</span> <span class="o">&lt;</span> <span class="mf">1.2</span><span class="p">)</span>
+                <span class="n">converged</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">rhat</span> <span class="o">&lt;</span> <span class="n">rhat_max</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_mpi</span><span class="p">:</span>
                     <span class="n">converged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">converged</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -540,7 +546,7 @@
             
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncall</span> <span class="o">&gt;</span> <span class="n">max_ncalls</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;maximum number of likelihood calls reached&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;maximum number of likelihood calls reached&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
@@ -552,13 +558,13 @@
 
             <span class="k">if</span> <span class="n">next_ncalls</span> <span class="o">&gt;</span> <span class="n">max_ncalls</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;would need more likelihood calls (</span><span class="si">%d</span><span class="s2">) than maximum (</span><span class="si">%d</span><span class="s2">) for next step&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">next_ncalls</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;would need more likelihood calls (</span><span class="si">%d</span><span class="s2">) than maximum (</span><span class="si">%d</span><span class="s2">) for next step&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">next_ncalls</span><span class="p">,</span> <span class="n">max_ncalls</span><span class="p">))</span>
                 <span class="k">break</span>
             
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;expected memory usage: </span><span class="si">%.2f</span><span class="s2"> GiB&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">num_chains</span> <span class="o">*</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">num_chains</span> <span class="o">*</span> <span class="n">num_steps</span> <span class="o">*</span> <span class="n">num_walkers</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_dim</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&gt;=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;would need too much memory for next step&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;would need too much memory for next step&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
             
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>

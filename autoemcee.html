@@ -105,6 +105,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">autoemcee module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autosampler.html">autosampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autosampler-prev.html">autosampler-prev module</a></li>
 </ul>
 </li>
 </ul>
@@ -228,7 +229,7 @@ random points for errors first. Useful to catch bugs.</p></li>
 
 <dl class="py method">
 <dt id="autoemcee.ReactiveAffineInvariantSampler.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_global_samples</span><span class="o">=</span><span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">num_chains</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">num_walkers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_ncalls</span><span class="o">=</span><span class="default_value">1000000</span></em>, <em class="sig-param"><span class="n">max_improvement_loops</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">num_initial_steps</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">min_autocorr_times</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_global_samples</span><span class="o">=</span><span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">num_chains</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">num_walkers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_ncalls</span><span class="o">=</span><span class="default_value">1000000</span></em>, <em class="sig-param"><span class="n">max_improvement_loops</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">num_initial_steps</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">min_autocorr_times</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">rhat_max</span><span class="o">=</span><span class="default_value">1.01</span></em>, <em class="sig-param"><span class="n">geweke_max</span><span class="o">=</span><span class="default_value">2.0</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/autoemcee.html#ReactiveAffineInvariantSampler.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#autoemcee.ReactiveAffineInvariantSampler.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sample until MCMC chains have converged.</p>
 <p>The steps are:</p>
 <ol class="arabic simple">
@@ -236,8 +237,8 @@ random points for errors first. Useful to catch bugs.</p></li>
 <li><p>Set <em>num_steps</em> to <em>num_initial_steps</em></p></li>
 <li><p>Run <em>num_chains</em> MCMC ensembles for <em>num_steps</em> steps</p></li>
 <li><p>For each walker chain, compute auto-correlation length (Convergence requires <em>num_steps</em>/autocorrelation length &gt; <em>min_autocorr_times</em>)</p></li>
-<li><p>For each parameter, compute geweke convergence diagnostic (Convergence requires |z| &lt; 2)</p></li>
-<li><p>For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat&lt;1.2)</p></li>
+<li><p>For each parameter, compute geweke convergence diagnostic (Convergence requires <a href="#id1"><span class="problematic" id="id2">|z|</span></a> &lt; geweke_max)</p></li>
+<li><p>For each ensemble, compute gelman-rubin rank convergence diagnostic (Convergence requires rhat&lt;rhat_max)</p></li>
 <li><p>If converged, stop and return results.</p></li>
 <li><p>Increase <em>num_steps</em> by 10, and repeat from (3) up to <em>max_improvement_loops</em> times.</p></li>
 </ol>
@@ -254,6 +255,8 @@ this is set to the number of MPI processes.</p></li>
 <li><p><strong>min_autocorr_times</strong> (<em>float</em>) – if positive, additionally require for convergence that the
 number of samples is larger than the <em>min_autocorr_times</em>
 times the autocorrelation length.</p></li>
+<li><p><strong>geweke_max</strong> (<em>float</em>) – Maximum absolute z-score of the geweke test allowed for convergence.</p></li>
+<li><p><strong>rhat_max</strong> (<em>float</em>) – Maximum r-hat allowed for convergence.</p></li>
 <li><p><strong>progress</strong> (<em>bool</em>) – if True, show progress bars</p></li>
 </ul>
 </dd>

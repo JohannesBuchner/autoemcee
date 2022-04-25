@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Checking convergence of Emcee and Zeus chains &mdash; autoemcee 0.3.2 documentation</title>
+  <title>MCMC ensemble convergence test &mdash; autoemcee 0.3.2 documentation</title>
   
 
   
@@ -102,10 +102,10 @@
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="history.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="issues.html">Frequently Asked Questions</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Checking convergence of Emcee and Zeus chains</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Running-emcee">Running emcee</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MCMC ensemble convergence test</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Running-an-ensemble">Running an ensemble</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Convergence-testing">Convergence testing</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#Convergence-results:">Convergence results:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Interpreting-the-result">Interpreting the result</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Combining-all-posteriors">Combining all posteriors</a></li>
 </ul>
 </li>
@@ -159,7 +159,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Checking convergence of Emcee and Zeus chains</li>
+      <li>MCMC ensemble convergence test</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -446,10 +446,10 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="Checking-convergence-of-Emcee-and-Zeus-chains">
-<h1>Checking convergence of Emcee and Zeus chains<a class="headerlink" href="#Checking-convergence-of-Emcee-and-Zeus-chains" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="MCMC-ensemble-convergence-test">
+<h1>MCMC ensemble convergence test<a class="headerlink" href="#MCMC-ensemble-convergence-test" title="Permalink to this headline">¶</a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -461,11 +461,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Running-emcee">
-<h2>Running emcee<a class="headerlink" href="#Running-emcee" title="Permalink to this headline">¶</a></h2>
-<p>Lets take the tutorial example of running a emcee example:</p>
+<div class="section" id="Running-an-ensemble">
+<h2>Running an ensemble<a class="headerlink" href="#Running-an-ensemble" title="Permalink to this headline">¶</a></h2>
+<p>Lets take the tutorial example of running emcee:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -494,11 +494,11 @@ Chain shape: (10000, 100, 5)
 </div>
 <p>There are two things we need to improve here:</p>
 <ol class="arabic simple">
-<li><p>we want to remove some warm-up points from the beginning of each chain. Lets take away the first quarter.</p></li>
-<li><p>To reliably test the stationarity of the chains, we need <em>several</em> independent chains that should appear indistinguishable. Because the ensemble proposals entangles the walkers among each other, one ensemble is not enough. We need a few independently run ensembles. Four is usually enough.</p></li>
+<li><p>we want to remove some warm-up points from the beginning of each chain. Lets take away the first quarter of the chain.</p></li>
+<li><p>To reliably test the stationarity of a chain, we need <em>several</em> independent chains that should appear indistinguishable. Because the ensemble proposals entangles the walkers among each other, one ensemble is not enough. We need a few independently run ensembles. Four is usually enough.</p></li>
 </ol>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -534,8 +534,8 @@ ensemble 4: sampling ...
 <div class="section" id="Convergence-testing">
 <h2>Convergence testing<a class="headerlink" href="#Convergence-testing" title="Permalink to this headline">¶</a></h2>
 <p>First we test within each ensemble, that each walker has a short auto-correlation time. Secondly, we check the Geweke drift from the first to last quarter of the chain. These checks are done for each parameter.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -547,7 +547,8 @@ ensemble 4: sampling ...
 <span class="c1"># Geweke convergence test threshold</span>
 <span class="n">geweke_max</span> <span class="o">=</span> <span class="mf">2.0</span>
 
-<span class="k">for</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="n">samplers</span><span class="p">:</span>
+<span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samplers</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;looking for issues within chain </span><span class="si">%d</span><span class="s2"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()</span>
     <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">ndim</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">shape</span>
     <span class="c1"># 0. analyse each variable</span>
@@ -585,21 +586,12 @@ ensemble 4: sampling ...
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;geweke drift (z=</span><span class="si">%.1f</span><span class="s2">) detected for parameter &#39;</span><span class="si">%d</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geweke_z</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
             <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;converged (intermediate result): &quot;</span><span class="p">,</span> <span class="n">converged</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-converged (intermediate result):  True
-</pre></div></div>
-</div>
 <p>The above is just a first smoke-test, if these tests do not succeed, you really are in trouble!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -610,7 +602,7 @@ converged (intermediate result):  True
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -626,8 +618,8 @@ converged (intermediate result):  True
 Rhat: 1.00
 </pre></div></div>
 </div>
-<div class="section" id="Convergence-results:">
-<h3>Convergence results:<a class="headerlink" href="#Convergence-results:" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="Interpreting-the-result">
+<h3>Interpreting the result<a class="headerlink" href="#Interpreting-the-result" title="Permalink to this headline">¶</a></h3>
 <p>You can find out more about the <a class="reference external" href="https://arviz-devs.github.io/arviz/api/generated/arviz.rhat.html">Rhat</a> rank test. As a rule of thumb:</p>
 <p>If Rhat is below 1.01, then no convergence problem was detected.</p>
 <p>If Rhat is higher, you need to run your ensembles longer.</p>
@@ -637,7 +629,7 @@ Rhat: 1.00
 <h3>Combining all posteriors<a class="headerlink" href="#Combining-all-posteriors" title="Permalink to this headline">¶</a></h3>
 <p>Now we can put all the ensembles together to get very nice posterior sampling.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -646,7 +638,7 @@ Rhat: 1.00
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -655,12 +647,12 @@ Rhat: 1.00
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(400000, 5)
+(4000000, 5)
 </pre></div></div>
 </div>
 </div>

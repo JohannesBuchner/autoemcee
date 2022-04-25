@@ -4,12 +4,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Checking convergence of Emcee and Zeus chains"
+    "# MCMC ensemble convergence test"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
+   "execution_count": 1,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -24,14 +24,14 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Running emcee\n",
+    "## Running an ensemble\n",
     "\n",
-    "Lets take the tutorial example of running a emcee example:"
+    "Lets take the tutorial example of running emcee:"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 46,
+   "execution_count": 2,
    "metadata": {},
    "outputs": [
     {
@@ -63,14 +63,14 @@
    "source": [
     "There are two things we need to improve here:\n",
     "\n",
-    "1) we want to remove some warm-up points from the beginning of each chain. Lets take away the first quarter.\n",
+    "1) we want to remove some warm-up points from the beginning of each chain. Lets take away the first quarter of the chain.\n",
     "\n",
-    "2) To reliably test the stationarity of the chains, we need *several* independent chains that should appear indistinguishable. Because the ensemble proposals entangles the walkers among each other, one ensemble is not enough. We need a few independently run ensembles. Four is usually enough."
+    "2) To reliably test the stationarity of a chain, we need *several* independent chains that should appear indistinguishable. Because the ensemble proposals entangles the walkers among each other, one ensemble is not enough. We need a few independently run ensembles. Four is usually enough."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 47,
+   "execution_count": 3,
    "metadata": {},
    "outputs": [
     {
@@ -117,17 +117,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 52,
+   "execution_count": 4,
    "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "converged (intermediate result):  True\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "converged = True\n",
     "\n",
@@ -137,7 +129,8 @@
     "# Geweke convergence test threshold\n",
     "geweke_max = 2.0\n",
     "\n",
-    "for sampler in samplers:\n",
+    "for c, sampler in enumerate(samplers):\n",
+    "    print(\"looking for issues within chain %d ...\" % (c+1))\n",
     "    chain = sampler.get_chain()\n",
     "    num_steps, num_walkers, ndim = chain.shape\n",
     "    # 0. analyse each variable\n",
@@ -173,9 +166,7 @@
     "        geweke_z = (a.mean() - b.mean()) / (np.var(a) + np.var(b))**0.5\n",
     "        if geweke_z > geweke_max:\n",
     "            print(\"geweke drift (z=%.1f) detected for parameter '%d'\" % (geweke_z, i))\n",
-    "            converged = False\n",
-    "\n",
-    "print(\"converged (intermediate result): \", converged)"
+    "            converged = False\n"
    ]
   },
   {
@@ -187,7 +178,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 53,
+   "execution_count": 5,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -198,7 +189,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 54,
+   "execution_count": 6,
    "metadata": {},
    "outputs": [
     {
@@ -217,7 +208,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "### Convergence results:\n",
+    "### Interpreting the result\n",
     "\n",
     "You can find out more about the [Rhat](https://arviz-devs.github.io/arviz/api/generated/arviz.rhat.html) rank test. As a rule of thumb:\n",
     "\n",
@@ -239,7 +230,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 44,
+   "execution_count": 7,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -248,16 +239,16 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 45,
+   "execution_count": 8,
    "metadata": {},
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "(400000, 5)"
+       "(4000000, 5)"
       ]
      },
-     "execution_count": 45,
+     "execution_count": 8,
      "metadata": {},
      "output_type": "execute_result"
     }

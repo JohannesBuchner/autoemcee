@@ -108,10 +108,10 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mcmc-ensemble-convergence.html">MCMC ensemble convergence test</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="history.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="issues.html">Frequently Asked Questions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mcmc-ensemble-convergence.html">MCMC ensemble convergence test</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autoemcee.html">autoemcee module</a></li>
 </ul>
 
@@ -207,16 +207,18 @@
 <h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
 <p>Runs a family of Markov Chain Monte Carlo ensemble samplers (Affine-Invariant or Slice Sampler)
 with gradually increasing number of samples until they converge.</p>
-<p>Convergence is tested for each ensemble and for each parameter with the Geweke diagnostic.
-Additionally, across ensembles, the Gelman-Rubin r-hat is used.</p>
-<p>Supports MPI, without requiring any modifications to your code (just run your script with mpiexec).</p>
+<p>Convergence is tested within each ensemble and across ensembles,
+see <a class="reference external" href="mcmc-ensemble-convergence.html">MCMC ensemble convergence test</a>
+for details.</p>
+<p>Supports parallelisation with MPI. No modifications to your code is needed,
+just run your script with mpiexec.</p>
+<p>This package is built on top of emcee, zeus, anviz and mpi4py.</p>
+<p>You can help by testing autoemcee and reporting issues. Code contributions are welcome.
+See the <a class="reference external" href="https://johannesbuchner.github.io/autoemcee/contributing.html">Contributing page</a>.</p>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/autoemcee"><img alt="https://img.shields.io/pypi/v/autoemcee.svg" src="https://img.shields.io/pypi/v/autoemcee.svg" /></a>
 <a class="reference external image-reference" href="https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml"><img alt="https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg" src="https://github.com/JohannesBuchner/autoemcee/actions/workflows/tests.yml/badge.svg" /></a>
 <a class="reference external image-reference" href="https://coveralls.io/github/JohannesBuchner/autoemcee?branch=master"><img alt="https://coveralls.io/repos/github/JohannesBuchner/autoemcee/badge.svg?branch=master" src="https://coveralls.io/repos/github/JohannesBuchner/autoemcee/badge.svg?branch=master" /></a>
 <a class="reference external image-reference" href="https://johannesbuchner.github.io/autoemcee/"><img alt="Documentation Status" src="https://img.shields.io/badge/docs-published-ok.svg" /></a>
-<p>This package is built on top of emcee, zeus, anviz and mpi4py.</p>
-<p>You can help by testing autoemcee and reporting issues. Code contributions are welcome.
-See the <a class="reference external" href="https://johannesbuchner.github.io/autoemcee/contributing.html">Contributing page</a>.</p>
 </div>
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>

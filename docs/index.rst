@@ -8,6 +8,7 @@ Welcome to autoemcee's documentation!
    readme
    installation
    example.ipynb
+   mcmc-ensemble-convergence.ipynb
    contributing
    history
    issues

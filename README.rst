@@ -10,10 +10,17 @@ About
 Runs a family of Markov Chain Monte Carlo ensemble samplers (Affine-Invariant or Slice Sampler)
 with gradually increasing number of samples until they converge.
 
-Convergence is tested for each ensemble and for each parameter with the Geweke diagnostic.
-Additionally, across ensembles, the Gelman-Rubin r-hat is used.
+Convergence is tested within each ensemble and across ensembles,
+see `MCMC ensemble convergence test <mcmc-ensemble-convergence.html>`_
+for details.
 
-Supports MPI, without requiring any modifications to your code (just run your script with mpiexec).
+Supports parallelisation with MPI. No modifications to your code is needed, 
+just run your script with mpiexec.
+
+This package is built on top of emcee, zeus, anviz and mpi4py.
+
+You can help by testing autoemcee and reporting issues. Code contributions are welcome.
+See the `Contributing page <https://johannesbuchner.github.io/autoemcee/contributing.html>`_.
 
 .. image:: https://img.shields.io/pypi/v/autoemcee.svg
         :target: https://pypi.python.org/pypi/autoemcee
@@ -27,11 +34,6 @@ Supports MPI, without requiring any modifications to your code (just run your sc
 .. image:: https://img.shields.io/badge/docs-published-ok.svg
         :target: https://johannesbuchner.github.io/autoemcee/
         :alt: Documentation Status
-
-This package is built on top of emcee, zeus, anviz and mpi4py.
-
-You can help by testing autoemcee and reporting issues. Code contributions are welcome.
-See the `Contributing page <https://johannesbuchner.github.io/autoemcee/contributing.html>`_.
 
 Features
 ---------

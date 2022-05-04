@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MCMC ensemble convergence test &mdash; autoemcee 0.3.2 documentation</title>
+  <title>MCMC ensemble convergence test &mdash; autoemcee 0.4.0 documentation</title>
   
 
   
@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.3.2
+                0.4.0
               </div>
             
           
@@ -458,12 +458,14 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">arviz</span>
 <span class="kn">import</span> <span class="nn">emcee</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
 </pre></div>
 </div>
 </div>
 <div class="section" id="Running-an-ensemble">
 <h2>Running an ensemble<a class="headerlink" href="#Running-an-ensemble" title="Permalink to this headline">¶</a></h2>
-<p>Lets take the tutorial example of running emcee:</p>
+<p>Lets take the tutorial example of running <a class="reference external" href="https://emcee.readthedocs.io/en/stable/tutorials/quickstart/">emcee</a>:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -472,7 +474,7 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="k">def</span> <span class="nf">log_prob</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ivar</span><span class="p">):</span>
     <span class="k">return</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ivar</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
-<span class="n">ndim</span><span class="p">,</span> <span class="n">nwalkers</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">100</span>
+<span class="n">ndim</span><span class="p">,</span> <span class="n">nwalkers</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">32</span>
 <span class="n">ivar</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
 <span class="n">p0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nwalkers</span><span class="p">,</span> <span class="n">ndim</span><span class="p">)</span>
 
@@ -489,7 +491,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Chain shape: (10000, 100, 5)
+Chain shape: (10000, 32, 5)
 </pre></div></div>
 </div>
 <p>There are two things we need to improve here:</p>
@@ -534,7 +536,7 @@ ensemble 4: sampling ...
 <div class="section" id="Convergence-testing">
 <h2>Convergence testing<a class="headerlink" href="#Convergence-testing" title="Permalink to this headline">¶</a></h2>
 <p>First we test within each ensemble, that each walker has a short auto-correlation time. Secondly, we check the Geweke drift from the first to last quarter of the chain. These checks are done for each parameter.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
@@ -545,11 +547,15 @@ ensemble 4: sampling ...
 <span class="n">min_autocorr_times</span> <span class="o">=</span> <span class="mi">5</span>
 
 <span class="c1"># Geweke convergence test threshold</span>
-<span class="n">geweke_max</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">geweke_max</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="c1"># whether you already want some plots showing the issue</span>
+<span class="n">plot</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">sampler</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samplers</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;looking for issues within chain </span><span class="si">%d</span><span class="s2"> ...&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">c</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">()</span>
+    <span class="n">flat_chain</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_walkers</span><span class="p">,</span> <span class="n">ndim</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">shape</span>
     <span class="c1"># 0. analyse each variable</span>
     <span class="n">max_autocorrlength</span> <span class="o">=</span> <span class="mi">1</span>
@@ -565,29 +571,43 @@ ensemble 4: sampling ...
                     <span class="n">tau</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">max_autocorrlength</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_autocorrlength</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">chain_walker</span><span class="p">)</span> <span class="o">/</span> <span class="n">tau</span> <span class="o">&lt;</span> <span class="n">min_autocorr_times</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;autocorrelation is long for parameter &#39;</span><span class="si">%d</span><span class="s2">&#39;: tau=</span><span class="si">%.1f</span><span class="s2"> -&gt; </span><span class="si">%d</span><span class="s2">x lengths&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">/</span> <span class="n">tau</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;autocorrelation is long for parameter </span><span class="si">%d</span><span class="s2">: tau=</span><span class="si">%.1f</span><span class="s2"> -&gt; </span><span class="si">%d</span><span class="s2">x lengths&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">num_steps</span> <span class="o">/</span> <span class="n">tau</span><span class="p">))</span>
                     <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1"># you could plot chain_walker to visualise</span>
                     <span class="k">break</span>
         <span class="k">except</span> <span class="n">emcee</span><span class="o">.</span><span class="n">autocorr</span><span class="o">.</span><span class="n">AutocorrError</span><span class="p">:</span>
             <span class="n">max_autocorrlength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
             <span class="k">if</span> <span class="n">min_autocorr_times</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;autocorrelation is too long for parameter &#39;</span><span class="si">%d</span><span class="s2">&#39; to be estimated&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;autocorrelation is too long for parameter </span><span class="si">%d</span><span class="s2"> to be estimated&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
                 <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># you could plot chain_walker to visualise</span>
                 <span class="k">break</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">converged</span><span class="p">:</span>
             <span class="k">break</span>
 
         <span class="c1"># secondly, detect drift with geweke</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">get_chain</span><span class="p">(</span><span class="n">flat</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="o">-</span><span class="n">num_steps</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">flat_chain</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">flat_chain</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">flat_chain</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">flat_chain</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span>
         <span class="n">geweke_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>
         <span class="k">if</span> <span class="n">geweke_z</span> <span class="o">&gt;</span> <span class="n">geweke_max</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;geweke drift (z=</span><span class="si">%.1f</span><span class="s2">) detected for parameter &#39;</span><span class="si">%d</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geweke_z</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;geweke drift (z=</span><span class="si">%.1f</span><span class="s2">) detected for parameter </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geweke_z</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
             <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># you can plot histograms of a and b to visualise</span>
 
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+looking for issues within chain 1 ...
+looking for issues within chain 2 ...
+looking for issues within chain 3 ...
+looking for issues within chain 4 ...
+</pre></div></div>
 </div>
 <p>The above is just a first smoke-test, if these tests do not succeed, you really are in trouble!</p>
 <div class="nbinput nblast docutils container">
@@ -652,7 +672,7 @@ Rhat: 1.00
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(4000000, 5)
+(1280000, 5)
 </pre></div></div>
 </div>
 </div>

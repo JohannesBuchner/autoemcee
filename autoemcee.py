@@ -307,6 +307,7 @@ class ReactiveAffineInvariantSampler(object):
                     self.logger.debug(
                         "acceptance rates: %s%% (worst few)", 
                         (accepts[i[:8]] * 100. / (num_steps - 1)).astype(int))
+                flat_chain = sampler.get_chain(flat=True)
                 
                 # diagnose this chain
                 
@@ -338,8 +339,8 @@ class ReactiveAffineInvariantSampler(object):
                         break
 
                     # secondly, detect drift with geweke
-                    a = sampler.get_chain(flat=True)[:num_steps // 4, i]
-                    b = sampler.get_chain(flat=True)[-num_steps // 4:, i]
+                    a = flat_chain[:len(flat_chain) // 4, i]
+                    b = flat_chain[-len(flat_chain) // 4:, i]
                     geweke_z = (a.mean() - b.mean()) / (np.var(a) + np.var(b))**0.5
                     if geweke_z > geweke_max:
                         self.logger.debug("geweke drift (z=%.1f) detected for parameter '%s'" % (geweke_z, self.paramnames[i]))

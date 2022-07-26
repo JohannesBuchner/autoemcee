@@ -9,6 +9,7 @@ Welcome to autoemcee's documentation!
    installation
    example.ipynb
    mcmc-ensemble-convergence.ipynb
+   priors
    contributing
    history
    issues

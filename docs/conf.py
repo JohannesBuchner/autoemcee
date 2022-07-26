@@ -60,7 +60,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'autoemcee'
-copyright = u"2020, Johannes Buchner"
+copyright = u"2020-2022, Johannes Buchner"
 author = u"Johannes Buchner"
 
 # The version info for the project you're documenting, acts as replacement
@@ -201,6 +201,3 @@ texinfo_documents = [
      'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

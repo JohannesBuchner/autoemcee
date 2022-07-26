@@ -448,7 +448,7 @@ div.rendered_html tbody tr:hover {
 <h2>Quickstart<a class="headerlink" href="#Quickstart" title="Permalink to this headline">¶</a></h2>
 <p>Here is how to fit a simple likelihood function:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -483,10 +483,104 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-100%|██████████| 100/100 [00:00&lt;00:00, 900.92it/s]
-100%|██████████| 100/100 [00:00&lt;00:00, 914.92it/s]
-100%|██████████| 100/100 [00:00&lt;00:00, 919.43it/s]
-100%|██████████| 100/100 [00:00&lt;00:00, 927.28it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 807.30it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 832.95it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 836.21it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 840.75it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] rhat chain diagnostic: [1.08197523 1.09111689] (&lt;1.010 is good)
+[autoemcee] not converged yet at iteration 1 after 80400 evals
+[autoemcee] Running 1000 MCMC steps ...
+[autoemcee] Starting points chosen: {83}, L=-32.8
+[autoemcee] Starting at [0.54827713 0.55143729] +- [4.31449488e-06 4.59671758e-06]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 100/100 [00:00&lt;00:00, 833.73it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 830.73it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Starting points chosen: {92}, L=-32.8
+[autoemcee] Starting at [0.5503052  0.54975206] +- [4.78590847e-06 4.87496661e-06]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+100%|██████████| 100/100 [00:00&lt;00:00, 841.34it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 848.18it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Starting points chosen: {87}, L=-32.8
+[autoemcee] Starting at [0.5517947  0.54986288] +- [5.18789023e-06 5.62474579e-06]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+100%|██████████| 100/100 [00:00&lt;00:00, 846.89it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 847.88it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Starting points chosen: {95}, L=-32.8
+[autoemcee] Starting at [0.55019943 0.5495126 ] +- [4.52229076e-06 5.08853735e-06]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+100%|██████████| 100/100 [00:00&lt;00:00, 838.69it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 770.95it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Used 440800 calls in last MCMC run
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -494,16 +588,16 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[autoemcee] rhat chain diagnostic: [1.07578334 1.08435227] (&lt;1.2 is good)
+[autoemcee] rhat chain diagnostic: [1.00026866 1.00017957] (&lt;1.010 is good)
 [autoemcee] converged!!!
 
-    Hinz                0.499 +- 0.058
-    Kunz                0.496 +- 0.062
+    Hinz                0.500 +- 0.010
+    Kunz                0.500 +- 0.010
 </pre></div></div>
 </div>
 <p>The chains converged and we got parameter and uncertainty estimates.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -516,14 +610,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Loglikelihood was called 80400 times.
+Loglikelihood was called 521200 times.
 </pre></div></div>
 </div>
 </div>
 <div class="section" id="Visualisation">
 <h2>Visualisation<a class="headerlink" href="#Visualisation" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -532,19 +626,11 @@ Loglikelihood was called 80400 times.
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:root:Too few points to create valid contours
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/example_6_1.png" src="_images/example_6_1.png" />
+<img alt="_images/example_6_0.png" src="_images/example_6_0.png" />
 </div>
 </div>
 </div>
@@ -552,7 +638,7 @@ WARNING:root:Too few points to create valid contours
 <h2>Advanced usage<a class="headerlink" href="#Advanced-usage" title="Permalink to this headline">¶</a></h2>
 <p>Lets try a function that cannot be described by a simple gaussian.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -589,24 +675,10 @@ WARNING:root:Too few points to create valid contours
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:autoemcee:finding starting points and running initial 100 MCMC steps
-DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 705.27it/s]
-DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 722.22it/s]
-DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 698.93it/s]
-DEBUG:autoemcee:global sampling for starting point ...
-100%|██████████| 100/100 [00:00&lt;00:00, 711.28it/s]
-DEBUG:autoemcee:checking convergence (iteration 1) ...
-DEBUG:autoemcee:acceptance rates: [ 3  5  7  9  9 10 11 11]% (worst few)
-DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
-DEBUG:autoemcee:acceptance rates: [ 4  4  6  8  9  9  9 10]% (worst few)
-DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
-DEBUG:autoemcee:acceptance rates: [ 3  6  8  9  9 10 11 11]% (worst few)
-DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
-DEBUG:autoemcee:acceptance rates: [ 4  7  7  8  9  9 10 10]% (worst few)
-DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
+100%|██████████| 100/100 [00:00&lt;00:00, 634.17it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 635.09it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 611.98it/s]
+100%|██████████| 100/100 [00:00&lt;00:00, 623.38it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -614,7 +686,11 @@ DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[autoemcee] rhat chain diagnostic: [1.00743679 1.00573425] (&lt;1.2 is good)
+[autoemcee] rhat chain diagnostic: [1.02016236 1.01082186] (&lt;1.010 is good)
+[autoemcee] not converged yet at iteration 1 after 80400 evals
+[autoemcee] Running 1000 MCMC steps ...
+[autoemcee] Starting points chosen: {84}, L=-0.0
+[autoemcee] Starting at [0.49732951 0.49864447] +- [0.0003298 0.0005775]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -622,7 +698,9 @@ DEBUG:autoemcee:autocorrelation length: tau=inf -&gt; 0x lengths
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-INFO:autoemcee:rhat chain diagnostic: [1.00743679 1.00573425] (&lt;1.2 is good)
+
+100%|██████████| 100/100 [00:00&lt;00:00, 600.89it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 627.67it/s]
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -630,20 +708,87 @@ INFO:autoemcee:rhat chain diagnostic: [1.00743679 1.00573425] (&lt;1.2 is good)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[autoemcee] converged!!!
+[autoemcee] Starting points chosen: {13}, L=-0.0
+[autoemcee] Starting at [0.59658084 0.69056221] +- [0.00034056 0.00054237]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+100%|██████████| 100/100 [00:00&lt;00:00, 636.22it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 641.76it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Starting points chosen: {81}, L=-0.0
+[autoemcee] Starting at [0.45616206 0.54018849] +- [0.00033495 0.00057437]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+100%|██████████| 100/100 [00:00&lt;00:00, 636.27it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 633.62it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Starting points chosen: {70}, L=-0.0
+[autoemcee] Starting at [0.50447467 0.49863139] +- [0.00026029 0.00050001]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
+100%|██████████| 100/100 [00:00&lt;00:00, 631.02it/s]
+100%|██████████| 1000/1000 [00:01&lt;00:00, 635.85it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[autoemcee] Used 440800 calls in last MCMC run
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-INFO:autoemcee:converged!!!
+[autoemcee] rhat chain diagnostic: [1.05343804 1.04422692] (&lt;1.010 is good)
+[autoemcee] not converged yet at iteration 2 after 521200 evals
+[autoemcee] would need more likelihood calls (4408000) than maximum (1000000) for next step
 </pre></div></div>
 </div>
 <p>This already took quite a bit more effort.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -656,12 +801,12 @@ INFO:autoemcee:converged!!!
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Loglikelihood was called 80400 times.
+Loglikelihood was called 521200 times.
 </pre></div></div>
 </div>
 <p>Lets see how well it did:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -687,7 +832,7 @@ Removed no burn in
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -704,24 +849,16 @@ Removed no burn in
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-WARNING:root:fine_bins_2D not large enough for optimal density
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/example_13_1.png" src="_images/example_13_1.png" />
+<img alt="_images/example_13_0.png" src="_images/example_13_0.png" />
 </div>
 </div>
 <p>As you can see, the MCMC sampler (black) is approximating the rosenbrock curvature (red).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -745,19 +882,18 @@ WARNING:root:fine_bins_2D not large enough for optimal density
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-WARNING:root:auto bandwidth for Hinz very small or failed (h=0.000361043402986483,N_eff=40000.0). Using fallback (h=0.022557839707916118)
-WARNING:root:auto bandwidth for Kunz very small or failed (h=0.00035974878923237315,N_eff=40000.0). Using fallback (h=0.01343557995754462)
-WARNING:root:fine_bins_2D not large enough for optimal density
+Removed no burn in
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-Removed no burn in
+WARNING:root:auto bandwidth for Hinz very small or failed (h=0.0005911494768376028,N_eff=400000.0). Using fallback (h=0.010347105781485627)
+WARNING:root:auto bandwidth for Kunz very small or failed (h=0.0006298615145645845,N_eff=400000.0). Using fallback (h=0.007399624413831077)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -791,7 +927,7 @@ Removed no burn in
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2020, Johannes Buchner
+        &copy; Copyright 2020-2022, Johannes Buchner
 
     </p>
   </div> 

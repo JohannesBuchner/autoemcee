@@ -286,7 +286,7 @@ class ReactiveAffineInvariantSampler(object):
             ncall_here += getattr(sampler, 'ncall', num_steps * num_walkers)
 
         if self.use_mpi:
-            recv_ncall = self.comm.gather(self.ncall, root=0)
+            recv_ncall = self.comm.gather(ncall_here, root=0)
             ncall_here = sum(self.comm.bcast(recv_ncall, root=0))
 
         assert ncall_here > 0, ncall_here

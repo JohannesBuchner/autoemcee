@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 from numpy import pi, sin, log
 import matplotlib.pyplot as plt
-import logging, sys
+import logging
 
 def main(args):
 

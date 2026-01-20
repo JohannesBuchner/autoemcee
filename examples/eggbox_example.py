@@ -1,8 +1,8 @@
 import argparse
 import numpy as np
-from numpy import pi, cos, log
+from numpy import pi, cos
 import matplotlib.pyplot as plt
-import logging, sys
+import logging
 
 def main(args):
 

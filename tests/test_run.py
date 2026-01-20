@@ -18,7 +18,7 @@ def test_run():
         return 10. * x - 5.
 
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, sampler='goodman-weare')
-    r = sampler.run(max_improvement_loops=1)
+    sampler.run(max_improvement_loops=1)
     
     assert abs(sampler.ncall - loglike.ncalls) == 2, (sampler.ncall, loglike.ncalls)
 
@@ -39,13 +39,13 @@ def test_run_vectorized():
     loglike.ncalls = 0
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, 
         sampler='goodman-weare', vectorized=True)
-    r = sampler.run(max_improvement_loops=2)
+    sampler.run(max_improvement_loops=2)
     assert 0.95 < sampler.ncall / loglike.ncalls < 1.05, (sampler.ncall, loglike.ncalls)
 
     loglike.ncalls = 0
     sampler = ReactiveAffineInvariantSampler(paramnames, loglike, transform=transform, 
         sampler='slice', vectorized=True)
-    r = sampler.run(max_improvement_loops=2)
+    sampler.run(max_improvement_loops=2)
     sampler.plot()
     assert 0.95 < sampler.ncall / loglike.ncalls < 1.05, (sampler.ncall, loglike.ncalls)
 

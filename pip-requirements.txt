@@ -1,4 +1,4 @@
-oldest-supported-numpy
+numpy
 emcee
 corner
 zeus-mcmc

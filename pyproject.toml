@@ -65,6 +65,3 @@ statistics = false
 
 [tool.pydocstyle]
 add-ignore = "D107"
-
-[tool.pytest.ini_options]
-collect_ignore = "['setup.py']"

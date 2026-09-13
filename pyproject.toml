@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "autoemcee"
-version = "0.4.1"
+version = "0.4.2"
 description = "Run affine-invariant sampler in automated fashion until convergence."
 readme = {file = "README.rst", content-type = "text/x-rst"}
 license = {text = "GNU General Public License v3"}
@@ -44,7 +44,7 @@ search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
 
 [[tool.bumpversion.files]]
-filename = "autoemcee/__init__.py"
+filename = "autoemcee.py"
 search = "__version__ = '{current_version}'"
 replace = "__version__ = '{new_version}'"
 

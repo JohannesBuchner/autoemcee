@@ -77,7 +77,7 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/snowline.rst
 	rm -f docs/modules.rst
 	#nbstripout docs/*.ipynb
-	sphinx-apidoc -H API -o docs/ . setup.py autosampler.py
+	sphinx-apidoc -H API -o docs/ . autosampler.py
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/build/html/index.html
@@ -89,9 +89,8 @@ release: dist ## package and upload a release
 	twine upload --verbose dist/*.tar.gz
 
 dist: clean ## builds source and wheel package
-	$(PYTHON) setup.py sdist
-	$(PYTHON) setup.py bdist_wheel
+	$(PYTHON) -m build
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	$(PYTHON) setup.py install
+	$(PYTHON) -m pip install .

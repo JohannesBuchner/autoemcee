@@ -1,0 +1,7 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[flake8]
+exclude = "docs"
+ignore = "E501,F401,E128,E231,E124"

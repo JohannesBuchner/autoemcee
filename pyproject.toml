@@ -19,3 +19,8 @@ add-ignore = "D107"
 
 [tool.pytest.ini_options]
 collect_ignore = "['setup.py']"
+
+[project.urls]
+Homepage = "https://github.com/JohannesBuchner/autoemcee"
+Source = "https://github.com/JohannesBuchner/autoemcee"
+Documentation = "https://johannesbuchner.github.io/autoemcee/"

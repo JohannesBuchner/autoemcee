@@ -325,7 +325,10 @@ class ReactiveAffineInvariantSampler(object):
                                 tau = max(tau, 1)
                             max_autocorrlength = max(max_autocorrlength, tau)
                             if len(chain_walker) / tau < min_autocorr_times:
-                                self.logger.debug("autocorrelation is long for parameter '%s': tau=%.1f -> %dx lengths" % (self.paramnames[i], tau, num_steps / tau))
+                                self.logger.debug(
+                                    "autocorrelation is long for parameter '%s': "
+                                    "tau=%.1f -> %dx lengths" % (
+                                        self.paramnames[i], tau, num_steps / tau))
                                 converged = False
                                 break
                     except emcee.autocorr.AutocorrError:
